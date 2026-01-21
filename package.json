@@ -34,10 +34,10 @@
   ],
   "scripts": {
     "dev": "vite",
-    "dev:react": "vite --config demo-react/vite.config.ts",
+    "dev:react": "vite --config vite.config.react.ts",
     "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly && tsc -p tsconfig.react.json --emitDeclarationOnly",
     "typecheck": "vue-tsc --noEmit && tsc -p tsconfig.react.json --noEmit",
-    "lint": "eslint src demo demo-react"
+    "lint": "eslint src demo"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

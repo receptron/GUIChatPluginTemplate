@@ -5,11 +5,12 @@ import { resolve } from "path";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  root: resolve(__dirname),
-  // Allow imports from parent directory (src/)
+  root: resolve(__dirname, "demo/react"),
+  envDir: resolve(__dirname),
+  // Allow imports from root directory (src/, demo/shared/)
   server: {
     fs: {
-      allow: [".."],
+      allow: ["."],
     },
   },
 });

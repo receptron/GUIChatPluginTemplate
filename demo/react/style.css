@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Scan React components in src/react */
-@source "../src/react";
+@source "../../src/react";
 
 body {
   @apply m-0 p-5 font-sans bg-gray-100;

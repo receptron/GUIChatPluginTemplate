@@ -77,7 +77,7 @@
             <div class="flex gap-2">
               <input
                 v-model="userInput"
-                @keydown.enter="handleSend"
+                @keydown.enter="handleKeyDown"
                 type="text"
                 placeholder="Type a message... (try 'show me a quiz')"
                 :disabled="isLoading"
@@ -164,7 +164,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from "vue";
-import { plugin } from "../src/vue";
+import { plugin } from "../../src/vue";
 import { useChat } from "./useChat";
 import type { ToolPlugin, ToolSample, ToolResult } from "gui-chat-protocol/vue";
 
@@ -209,6 +209,12 @@ watch(
 );
 
 // Actions
+const handleKeyDown = (e: KeyboardEvent) => {
+  // Don't submit while composing (IME input)
+  if (e.isComposing) return;
+  handleSend();
+};
+
 const handleSend = async () => {
   const text = userInput.value.trim();
   if (!text || isLoading.value) return;

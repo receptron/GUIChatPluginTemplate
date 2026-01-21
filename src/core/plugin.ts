@@ -45,6 +45,7 @@ export const executeQuiz = async (
     };
 
     return {
+      toolName: TOOL_DEFINITION.name,
       message: `Quiz presented with ${questions.length} question${questions.length > 1 ? "s" : ""}`,
       jsonData: quizData,
       instructions:
@@ -53,6 +54,7 @@ export const executeQuiz = async (
   } catch (error) {
     console.error("Quiz creation error", error);
     return {
+      toolName: TOOL_DEFINITION.name,
       message: `Quiz error: ${error instanceof Error ? error.message : "Unknown error"}`,
       instructions:
         "Acknowledge that there was an error creating the quiz and suggest trying again.",

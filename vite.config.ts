@@ -6,6 +6,7 @@ import { resolve } from "path";
 
 export default defineConfig({
   plugins: [vue(), react(), tailwindcss()],
+  envDir: resolve(__dirname),
   build: {
     lib: {
       entry: {
