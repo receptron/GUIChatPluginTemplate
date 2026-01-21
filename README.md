@@ -4,6 +4,8 @@ A plugin template for GUIChat/MulmoChat with **integrated chat demo environment*
 
 This template is designed for junior engineers to learn plugin development with a working chat interface that demonstrates how plugins interact with LLMs.
 
+> **Note**: This template includes a **Quiz plugin as a working sample**. The Quiz plugin demonstrates how to create interactive plugins with user input. Replace it with your own plugin implementation.
+
 ## Features
 
 - **Chat-Integrated Demo**: Test your plugin with a real chat interface
@@ -70,10 +72,10 @@ Edit the files in `src/vue/`:
 
 ### Step 4: Update mock responses (optional)
 
-Edit `demo/useChat.ts` to add mock responses for your plugin:
+Edit `demo/shared/chat-utils.ts` to add mock responses for your plugin:
 
 ```typescript
-const MOCK_RESPONSES: Record<string, ...> = {
+export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
   // Add your plugin's mock response
   myKeyword: {
     toolCall: {
@@ -81,6 +83,7 @@ const MOCK_RESPONSES: Record<string, ...> = {
       args: { /* your args */ },
     },
   },
+  // ...
 };
 ```
 
@@ -105,11 +108,18 @@ GUIChatPluginTemplate/
 │       ├── index.ts      # React plugin (combines core + components)
 │       ├── View.tsx      # Main view component
 │       └── Preview.tsx   # Sidebar preview component
-├── demo/                 # Vue demo with chat integration
-│   ├── App.vue           # Demo app with chat UI
-│   ├── useChat.ts        # Chat composable (LLM integration)
-│   └── main.ts           # Entry point
-└── demo-react/           # React demo
+└── demo/                 # Demo applications with chat
+    ├── vue/              # Vue demo
+    │   ├── App.vue       # Demo app with chat UI
+    │   ├── useChat.ts    # Chat composable
+    │   └── main.ts       # Entry point
+    ├── react/            # React demo
+    │   ├── App.tsx       # Demo app with chat UI
+    │   ├── useChat.ts    # Chat hook
+    │   └── main.tsx      # Entry point
+    └── shared/           # Shared utilities
+        ├── chat-types.ts # Chat message types
+        └── chat-utils.ts # OpenAI integration
 ```
 
 ## Understanding the Chat Flow
@@ -144,6 +154,7 @@ The execute function returns a `ToolResult`:
 
 ```typescript
 interface ToolResult<T, J> {
+  toolName: string;      // Must match TOOL_NAME (required)
   message: string;       // Brief status for LLM
   jsonData?: J;          // Data visible to LLM
   data?: T;              // Data for UI only (not sent to LLM)

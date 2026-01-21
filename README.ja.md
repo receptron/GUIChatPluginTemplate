@@ -1,126 +1,105 @@
-# MulmoChat Plugin Quiz
+# GUIChat プラグインテンプレート
 
-> **📦 テンプレートリポジトリ**
-> これは [MulmoChat](https://github.com/receptron/MulmoChat) プラグインのリファレンス実装です。
-> このリポジトリをテンプレートとして使用し、独自のプラグインを作成できます。
-> 詳細は [TEMPLATE.md](./TEMPLATE.md) を参照してください。
+**チャットデモ環境統合**を備えたGUIChat/MulmoChat用プラグインテンプレート。
 
-MulmoChat用のクイズプラグイン。複数選択式のクイズをユーザーに提示します。
+このテンプレートは、ジュニアエンジニアがプラグインとLLMの連携を実際のチャットインターフェースで確認しながらプラグイン開発を学べるように設計されています。
 
-## 概要
+> **Note**: このテンプレートには**Quizプラグインが動作サンプル**として含まれています。Quizプラグインは、ユーザー入力を受け付けるインタラクティブなプラグインの作成方法を示しています。自分のプラグイン実装に置き換えてください。
 
-このプラグインは、MulmoChatのプラグインシステムのリファレンス実装です。サーバー通信不要なシンプルな構造のため、新しいプラグインを作成する際のテンプレートとして使用できます。
+## 特徴
 
-**フレームワーク非依存のcoreアーキテクチャ**と**VueおよびReact実装**を実現しています:
-- **Core**: フレームワーク非依存のプラグインロジック（任意のUIフレームワークで使用可能）
-- **Vue**: Vue専用のUIコンポーネント
-- **React**: React専用のUIコンポーネント
+- **チャット統合デモ**: 実際のチャットインターフェースでプラグインをテスト
+- **Mockモード**: APIキー不要で開発
+- **Real APIモード**: 本番環境に近いOpenAI APIでテスト
+- **フレームワーク非依存のCore**: プラグインロジックをUIフレームワークから分離
+- **Vue + React対応**: 両フレームワークをすぐに使用可能
+- **TypeScript**: 完全な型安全性
+- **Tailwind CSS 4**: モダンなスタイリング
 
-### 特徴
+## クイックスタート
 
-- **Tailwind CSS 4** を使用したスタイリング
-- **TypeScript** による型安全な実装
-- **ESLint** による静的解析
-- **フレームワーク非依存のcore** による移植性
-- **マルチフレームワーク対応**（VueとReact）
-
-## インストール
-
-### MulmoChatへの追加
-
-1. プラグインをインストール:
 ```bash
-cd MulmoChat
-yarn add @mulmochat-plugin/quiz
+# 依存関係をインストール
+npm install
+
+# 開発サーバーを起動
+npm run dev        # Vueデモ
+npm run dev:react  # Reactデモ
 ```
 
-2. MulmoChatの`src/tools/index.ts`でインポート:
+http://localhost:5173 を開いてデモを確認。
+
+### デモ機能
+
+1. **チャットパネル**: メッセージを送信してLLMの応答を確認
+2. **Mockモード**: APIキー不要でテスト（「quiz」「hello」キーワードを認識）
+3. **Real APIモード**: OpenAI APIキーで実際のLLM連携
+4. **Viewコンポーネント**: プラグインの結果表示を確認
+5. **Previewコンポーネント**: サイドバーサムネイルを確認
+6. **Quick Samples**: プラグインサンプルを直接実行
+
+## 独自プラグインの作成
+
+### ステップ1: テンプレートをコピー
+
+```bash
+cp -r GUIChatPluginTemplate GUIChatPluginMyPlugin
+cd GUIChatPluginMyPlugin
+```
+
+### ステップ2: package.jsonを更新
+
+パッケージ名を変更:
+```json
+{
+  "name": "@gui-chat-plugin/my-plugin",
+  "description": "プラグインの説明"
+}
+```
+
+### ステップ3: プラグインを実装
+
+`src/core/`のファイルを編集:
+
+1. **types.ts** - データ型を定義
+2. **definition.ts** - ツール名とJSONスキーマを定義
+3. **samples.ts** - テストデータを追加
+4. **plugin.ts** - execute関数を実装
+
+`src/vue/`のファイルを編集:
+
+1. **View.vue** - メインUIコンポーネント
+2. **Preview.vue** - サイドバーサムネイル
+
+### ステップ4: モックレスポンスを更新（オプション）
+
+`demo/shared/chat-utils.ts`を編集してプラグイン用のモックレスポンスを追加:
+
 ```typescript
-import QuizPlugin from "@mulmochat-plugin/quiz/vue";
-
-// pluginListに追加
-const pluginList = [
-  // ... other plugins
-  QuizPlugin,
-];
-```
-
-3. `src/main.ts`でスタイルをインポート:
-```typescript
-import "@mulmochat-plugin/quiz/style.css";
-```
-
-## パッケージエクスポート
-
-```typescript
-// デフォルト: Core（フレームワーク非依存）
-import { pluginCore, TOOL_NAME, QuizData } from "@mulmochat-plugin/quiz";
-
-// Vue実装
-import QuizPlugin from "@mulmochat-plugin/quiz/vue";
-import "@mulmochat-plugin/quiz/style.css";
-
-// Vue名前付きエクスポート
-import { plugin, View, Preview } from "@mulmochat-plugin/quiz/vue";
-
-// React実装
-import QuizPlugin from "@mulmochat-plugin/quiz/react";
-import "@mulmochat-plugin/quiz/style.css";
-
-// React名前付きエクスポート
-import { plugin, View, Preview } from "@mulmochat-plugin/quiz/react";
-```
-
-## 開発
-
-### セットアップ
-
-```bash
-yarn install
-```
-
-### 開発サーバー
-
-```bash
-# Vueデモ
-yarn dev
-
-# Reactデモ
-yarn dev:react
-```
-
-http://localhost:5173/ でデモページが表示されます。
-
-### ビルド
-
-```bash
-yarn build
-```
-
-### 型チェック
-
-```bash
-yarn typecheck
-```
-
-### Lint
-
-```bash
-yarn lint
+export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
+  // プラグインのモックレスポンスを追加
+  myKeyword: {
+    toolCall: {
+      name: "myToolName",
+      args: { /* 引数 */ },
+    },
+  },
+  // ...
+};
 ```
 
 ## プラグイン構造
 
 ```
-MulmoChatPluginQuiz/
+GUIChatPluginTemplate/
 ├── src/
 │   ├── index.ts          # デフォルトエクスポート（core）
 │   ├── style.css         # Tailwind CSSエントリー
 │   ├── core/             # フレームワーク非依存（Vue/React依存なし）
 │   │   ├── index.ts      # Coreエクスポート
-│   │   ├── types.ts      # Quiz固有の型（QuizData, QuizArgs）
-│   │   ├── definition.ts # ツール定義（スキーマ）
-│   │   ├── samples.ts    # サンプルデータ
+│   │   ├── types.ts      # プラグイン固有の型
+│   │   ├── definition.ts # ツール定義（LLM用スキーマ）
+│   │   ├── samples.ts    # テスト用サンプルデータ
 │   │   └── plugin.ts     # Execute関数
 │   ├── vue/              # Vue固有の実装
 │   │   ├── index.ts      # Vueプラグイン（core + コンポーネント）
@@ -130,91 +109,129 @@ MulmoChatPluginQuiz/
 │       ├── index.ts      # Reactプラグイン（core + コンポーネント）
 │       ├── View.tsx      # メインビューコンポーネント
 │       └── Preview.tsx   # サイドバープレビュー
-├── demo/                 # Vueデモ
-│   ├── App.vue
-│   └── main.ts
-├── demo-react/           # Reactデモ
-│   ├── App.tsx
-│   ├── main.tsx
-│   ├── style.css
-│   ├── index.html
-│   └── vite.config.ts
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-├── tsconfig.react.json   # React用TypeScript設定
-└── eslint.config.js
+└── demo/                 # チャット統合デモ
+    ├── vue/              # Vueデモ
+    │   ├── App.vue       # チャットUI付きデモアプリ
+    │   ├── useChat.ts    # チャットコンポーザブル
+    │   └── main.ts       # エントリーポイント
+    ├── react/            # Reactデモ
+    │   ├── App.tsx       # チャットUI付きデモアプリ
+    │   ├── useChat.ts    # チャットフック
+    │   └── main.tsx      # エントリーポイント
+    └── shared/           # 共有ユーティリティ
+        ├── chat-types.ts # チャットメッセージ型
+        └── chat-utils.ts # OpenAI連携
 ```
 
-### ディレクトリの役割
+## チャットフローの理解
 
-- **src/core/**: フレームワーク非依存の型とプラグインロジック。Vue/React依存なし。
-- **src/vue/**: Vue専用UIコンポーネントとVueプラグインエクスポート。
-- **src/react/**: React専用UIコンポーネントとReactプラグインエクスポート。
-- **demo/**: Vueデモ。
-- **demo-react/**: Reactデモ。
+```
+ユーザー入力
+    ↓
+useChat.sendMessage()
+    ↓
+┌─────────────────────────────────────┐
+│  Mockモード?                        │
+│  ├─ Yes → モックレスポンスを返す    │
+│  └─ No  → OpenAI APIを呼び出す      │
+└─────────────────────────────────────┘
+    ↓
+LLMレスポンス（tool_callsを含む場合あり）
+    ↓
+┌─────────────────────────────────────┐
+│  tool_callsあり?                    │
+│  ├─ Yes → plugin.execute(args)      │
+│  │        → 結果を更新              │
+│  │        → Viewコンポーネントに表示 │
+│  │        → APIを再呼び出し          │
+│  │        → LLMの応答を取得          │
+│  └─ No  → テキストレスポンスを表示   │
+└─────────────────────────────────────┘
+```
 
-## 新しいプラグインの作成
+## 重要な概念
 
-自動生成スクリプトを使用するか、詳細なテンプレートガイドを参照してください:
+### ToolResult
 
-### クイックスタート（推奨）
+execute関数は`ToolResult`を返します:
+
+```typescript
+interface ToolResult<T, J> {
+  toolName: string;      // TOOL_NAMEと一致必須（必須）
+  message: string;       // LLM向けの簡潔なステータス
+  jsonData?: J;          // LLMに見えるデータ
+  data?: T;              // UI専用データ（LLMには送信されない）
+  title?: string;        // 結果のタイトル
+  instructions?: string; // LLMへのフォローアップ指示
+}
+```
+
+### Viewコンポーネントのprops
+
+```typescript
+// View.vueが受け取るprops
+{
+  selectedResult: ToolResult;              // 表示する現在の結果
+  sendTextMessage: (text: string) => void; // チャットにメッセージを送信
+}
+
+// 発行するイベント
+@updateResult="(updated: ToolResult) => void"
+```
+
+### 重要なパターン: ref + watch
+
+View.vueでは、`computed`の代わりに`ref + watch`パターンを使用:
+
+```typescript
+// ✅ 正しい
+const data = ref<MyData | null>(null);
+watch(
+  () => props.selectedResult,
+  (newResult) => {
+    if (newResult?.jsonData) {
+      data.value = newResult.jsonData;
+    }
+  },
+  { immediate: true }
+);
+
+// ❌ 間違い - リアクティビティの問題が発生
+const data = computed(() => props.selectedResult?.jsonData);
+```
+
+## コマンド
 
 ```bash
-# 新規プラグインを生成
-./scripts/create-plugin.sh my-plugin "My Plugin" "プラグインの説明"
-
-# 生成されたディレクトリに移動してインストール
-cd ../MulmoChatPluginMyPlugin
-yarn install
-yarn dev
+npm run dev          # Vueデモを起動
+npm run dev:react    # Reactデモを起動
+npm run build        # 本番用ビルド
+npm run typecheck    # 型チェック
+npm run lint         # コードのLint
 ```
 
-### 手動セットアップ
+## MulmoChatとの統合
 
-詳細な手順は [TEMPLATE.md](./TEMPLATE.md) を参照:
-- Core/Vue/Reactアーキテクチャ
-- そのままコピーできるファイル
-- プラグイン固有の実装要件
-- 重要なパターン（View.vueのリアクティビティ）
+プラグイン開発後:
 
-## Core型定義
+1. npmに公開またはローカルパスを使用
+2. MulmoChatにインストール:
+   ```bash
+   npm add @gui-chat-plugin/my-plugin
+   ```
+3. MulmoChatの`src/tools/index.ts`でインポート:
+   ```typescript
+   import MyPlugin from "@gui-chat-plugin/my-plugin/vue";
+   ```
 
-### ToolPluginCore（フレームワーク非依存）
+## ドキュメント
 
-```typescript
-interface ToolPluginCore<T, J, A> {
-  toolDefinition: ToolDefinition;
-  execute: (context: ToolContext, args: A) => Promise<ToolResult<T, J>>;
-  generatingMessage: string;
-  isEnabled: (startResponse?: StartApiResponse | null) => boolean;
-  // Optional
-  systemPrompt?: string;
-  inputHandlers?: InputHandler[];
-  configSchema?: PluginConfigSchema;
-  samples?: ToolSample[];
-  backends?: BackendType[];
-}
-```
+詳細なドキュメントは[docs/](./docs/)を参照:
 
-### ToolPlugin（Vue固有、ToolPluginCoreを拡張）
-
-```typescript
-interface ToolPlugin<T, J, A> extends ToolPluginCore<T, J, A> {
-  viewComponent?: Component;      // Vue Component
-  previewComponent?: Component;   // Vue Component
-  config?: ToolPluginConfig;      // レガシーVueコンポーネントベースの設定
-}
-```
-
-### ToolPlugin（React固有、ToolPluginCoreを拡張）
-
-```typescript
-interface ToolPlugin<T, J, A> extends ToolPluginCore<T, J, A> {
-  viewComponent?: ComponentType;    // React ComponentType
-  previewComponent?: ComponentType; // React ComponentType
-}
-```
+- [はじめに](./docs/getting-started.ja.md) - 初心者向けチュートリアル
+- [プラグイン開発ガイド](./docs/plugin-development-guide.md) - 詳細リファレンス
+- [AI開発ガイド](./docs/ai-development-guide.md) - AI向け最適化ガイド
+- [npm公開ガイド](./docs/npm-publishing-guide.md) - 公開と統合
 
 ## ライセンス
 

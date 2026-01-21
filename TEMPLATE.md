@@ -1,6 +1,6 @@
-# MulmoChat Plugin Template Guide
+# GUIChat Plugin Template Guide
 
-This guide explains how to create a new plugin using MulmoChatPluginQuiz as a template.
+This guide explains how to create a new plugin using GUIChatPluginTemplate as a template.
 
 ---
 
@@ -70,21 +70,21 @@ src/
 
 ```typescript
 // Default (Core - framework-agnostic)
-import { pluginCore, TOOL_NAME, QuizData } from "@mulmochat-plugin/quiz";
+import { pluginCore, TOOL_NAME, QuizData } from "@gui-chat-plugin/sample";
 
 // Vue implementation (for apps with UI)
-import QuizPlugin from "@mulmochat-plugin/quiz/vue";
-import "@mulmochat-plugin/quiz/style.css";
+import QuizPlugin from "@gui-chat-plugin/sample/vue";
+import "@gui-chat-plugin/sample/style.css";
 
 // Named Vue exports
-import { plugin, View, Preview } from "@mulmochat-plugin/quiz/vue";
+import { plugin, View, Preview } from "@gui-chat-plugin/sample/vue";
 
 // React implementation (for React apps)
-import QuizPlugin from "@mulmochat-plugin/quiz/react";
-import "@mulmochat-plugin/quiz/style.css";
+import QuizPlugin from "@gui-chat-plugin/sample/react";
+import "@gui-chat-plugin/sample/style.css";
 
 // Named React exports
-import { plugin, View, Preview } from "@mulmochat-plugin/quiz/react";
+import { plugin, View, Preview } from "@gui-chat-plugin/sample/react";
 ```
 
 ---
@@ -98,7 +98,7 @@ import { plugin, View, Preview } from "@mulmochat-plugin/quiz/react";
 ./scripts/create-plugin.sh my-plugin "My Plugin" "Description of my plugin"
 
 # 2. Move to generated directory
-cd ../MulmoChatPluginMyPlugin
+cd ../GUIChatPluginMyPlugin
 
 # 3. Install dependencies
 yarn install
@@ -456,9 +456,9 @@ Required for `yarn dev` to work:
 ---
 ---
 
-# MulmoChat プラグイン テンプレートガイド（日本語）
+# GUIChat プラグイン テンプレートガイド（日本語）
 
-このガイドは、MulmoChatPluginQuiz をテンプレートとして新しいプラグインを作成する手順を説明します。
+このガイドは、GUIChatPluginTemplate をテンプレートとして新しいプラグインを作成する手順を説明します。
 
 ---
 
@@ -528,21 +528,21 @@ src/
 
 ```typescript
 // デフォルト（Core - フレームワーク非依存）
-import { pluginCore, TOOL_NAME, QuizData } from "@mulmochat-plugin/quiz";
+import { pluginCore, TOOL_NAME, QuizData } from "@gui-chat-plugin/sample";
 
 // Vue実装（UIを持つアプリ用）
-import QuizPlugin from "@mulmochat-plugin/quiz/vue";
-import "@mulmochat-plugin/quiz/style.css";
+import QuizPlugin from "@gui-chat-plugin/sample/vue";
+import "@gui-chat-plugin/sample/style.css";
 
 // Vue名前付きエクスポート
-import { plugin, View, Preview } from "@mulmochat-plugin/quiz/vue";
+import { plugin, View, Preview } from "@gui-chat-plugin/sample/vue";
 
 // React実装（Reactアプリ用）
-import QuizPlugin from "@mulmochat-plugin/quiz/react";
-import "@mulmochat-plugin/quiz/style.css";
+import QuizPlugin from "@gui-chat-plugin/sample/react";
+import "@gui-chat-plugin/sample/style.css";
 
 // React名前付きエクスポート
-import { plugin, View, Preview } from "@mulmochat-plugin/quiz/react";
+import { plugin, View, Preview } from "@gui-chat-plugin/sample/react";
 ```
 
 ---
@@ -556,7 +556,7 @@ import { plugin, View, Preview } from "@mulmochat-plugin/quiz/react";
 ./scripts/create-plugin.sh my-plugin "My Plugin" "プラグインの説明"
 
 # 2. 生成されたディレクトリに移動
-cd ../MulmoChatPluginMyPlugin
+cd ../GUIChatPluginMyPlugin
 
 # 3. 依存関係をインストール
 yarn install
