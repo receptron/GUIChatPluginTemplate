@@ -112,7 +112,7 @@ Open http://localhost:5173. You'll see the Quiz demo working.
 > Before creating your own plugin, experience how a plugin works with the existing Quiz plugin.
 > This gives you a mental image of what your completed plugin will look like.
 
-## Step 2.5: Understanding Mock Mode (Important)
+## Step 3: Understanding Mock Mode (Important)
 
 ### What is Mock Mode?
 
@@ -291,7 +291,7 @@ When you want to test with actual LLM:
 4. Type naturally ("Create a greeting card for John")
 5. The LLM will automatically call your tool when appropriate
 
-## Step 3: Understand the Template
+## Step 4: Understand the Template
 
 **Purpose of this step:** Know what to edit and where
 
@@ -317,7 +317,7 @@ src/
 
 ---
 
-## Step 4: Define Your Tool (definition.ts)
+## Step 5: Define Your Tool (definition.ts)
 
 **Purpose of this step:** Tell the LLM "what this tool can do"
 
@@ -383,7 +383,7 @@ export const SYSTEM_PROMPT = `When the user wants to create a greeting or send a
 
 ---
 
-## Step 5: Define Types (types.ts)
+## Step 6: Define Types (types.ts)
 
 **Purpose of this step:** Define TypeScript types for consistency across all code
 
@@ -392,7 +392,7 @@ export const SYSTEM_PROMPT = `When the user wants to create a greeting or send a
 - `View.vue/Preview.vue`: Types for displayed data
 - `samples.ts`: Types for test data
 
-**Depends on:** Step 4 (match definition.ts parameters)
+**Depends on:** Step 5 (match definition.ts parameters)
 
 ### Why are type definitions needed?
 
@@ -436,7 +436,7 @@ export interface GreetingArgs {
 
 ---
 
-## Step 6: Implement Execute Function (plugin.ts)
+## Step 7: Implement Execute Function (plugin.ts)
 
 **Purpose of this step:** Write the logic that runs when the tool is called
 
@@ -445,8 +445,8 @@ export interface GreetingArgs {
 - Return value's `message` and `instructions` are sent to LLM
 
 **Depends on:**
-- Step 4: Uses `TOOL_NAME`
-- Step 5: Uses `GreetingData`, `GreetingArgs` types
+- Step 5: Uses `TOOL_NAME`
+- Step 6: Uses `GreetingData`, `GreetingArgs` types
 
 ### What is the Execute Function?
 
@@ -566,13 +566,13 @@ return {
 };
 ```
 
-## Step 7: Add Test Samples (samples.ts)
+## Step 8: Add Test Samples (samples.ts)
 
 **Purpose of this step:** Define test data for Quick Samples buttons
 
 **Impact:** Buttons appear in the "Quick Samples" section of the demo
 
-**Depends on:** Step 5 (must match GreetingArgs type)
+**Depends on:** Step 6 (must match GreetingArgs type)
 
 ### What are Samples?
 
@@ -641,16 +641,16 @@ export const SAMPLES: ToolSample[] = [
 
 ---
 
-## Step 8: Create the View Component (Vue)
+## Step 9: Create the View Component (Vue)
 
 **Purpose of this step:** Create the main UI for your plugin
 
 **Impact:** execute()'s result is displayed here
 
 **Depends on:**
-- Step 4: Uses `TOOL_NAME` to filter results
-- Step 5: Uses `GreetingData` type to receive data
-- Step 6: Receives `data` returned by `execute()`
+- Step 5: Uses `TOOL_NAME` to filter results
+- Step 6: Uses `GreetingData` type to receive data
+- Step 7: Receives `data` returned by `execute()`
 
 ### View Component Data Flow
 
@@ -721,13 +721,13 @@ watch(
 </script>
 ```
 
-## Step 9: Create the Preview Component (Vue)
+## Step 10: Create the Preview Component (Vue)
 
 **Purpose of this step:** Create a small thumbnail for the sidebar
 
 **Impact:** Shown in the sidebar results list
 
-**Depends on:** Step 5 (uses GreetingData type)
+**Depends on:** Step 6 (uses GreetingData type)
 
 ### What is Preview?
 
@@ -772,13 +772,13 @@ defineProps<{
 
 ---
 
-## Step 10: Update Exports
+## Step 11: Update Exports
 
 **Purpose of this step:** Make created modules available for external use
 
 **Impact:** Other projects can import your plugin after npm publish
 
-**Depends on:** All of Steps 4-9 (bundles all modules)
+**Depends on:** All of Steps 5-10 (bundles all modules)
 
 ### Why are exports needed?
 
@@ -827,7 +827,7 @@ export default { plugin };
 
 ---
 
-## Step 11: Update package.json
+## Step 12: Update package.json
 
 **Purpose of this step:** Set the package name
 
@@ -849,11 +849,11 @@ Edit `package.json`:
 
 ---
 
-## Step 12: Test Your Plugin
+## Step 13: Test Your Plugin
 
 **Purpose of this step:** Verify with Quick Samples
 
-**Depends on:** All Steps 1-10 must be complete
+**Depends on:** All Steps 1-11 must be complete
 
 ```bash
 yarn dev
@@ -863,13 +863,13 @@ yarn dev
 2. See your greeting card appear!
 3. Try other samples
 
-## Step 13: Test with Chat
+## Step 14: Test with Chat
 
 **Purpose of this step:** Test with chat-like interaction
 
 **Depends on:**
-- Step 12 is successful
-- Understanding Mock Mode from Step 2.5
+- Step 13 is successful
+- Understanding Mock Mode from Step 3
 
 ### Difference from Quick Samples
 
@@ -879,14 +879,14 @@ Mock Mode Chat:    Text input → Keyword match → execute() runs
 Real API Mode:     Text input → LLM decides → execute() runs
 ```
 
-Use Mock Mode as explained in Step 2.5:
+Use Mock Mode as explained in Step 3:
 
-1. Add the greeting mock response to `demo/shared/chat-utils.ts` (see Step 2.5)
+1. Add the greeting mock response to `demo/shared/chat-utils.ts` (see Step 3)
 2. Make sure "Mock Mode" is ON in the demo UI
 3. Type "create a greeting" in the chat
 4. Your greeting card appears!
 
-To test with Real API Mode, see "Switching to Real API Mode" in Step 2.5.
+To test with Real API Mode, see "Switching to Real API Mode" in Step 3.
 
 ---
 
