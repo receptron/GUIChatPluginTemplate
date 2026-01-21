@@ -10,7 +10,7 @@
 
 ## 前提条件
 
-- Node.js 18以上がインストール済み
+- Node.js 22以上がインストール済み
 - TypeScriptの基本知識
 - VueまたはReactの基本知識
 
@@ -22,13 +22,13 @@ git clone https://github.com/receptron/GUIChatPluginTemplate.git GUIChatPluginGr
 cd GUIChatPluginGreeting
 
 # 依存関係をインストール
-npm install
+yarn install
 ```
 
 ## ステップ2: デモを実行
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 http://localhost:5173 を開きます。Quizデモが動作しているはずです。
@@ -37,6 +37,114 @@ http://localhost:5173 を開きます。Quizデモが動作しているはずで
 1. Quick Samplesセクションの「Simple Quiz」ボタンをクリック
 2. Quiz Viewが表示される
 3. 質問に答える
+
+## ステップ2.5: Mock Modeを理解する（重要）
+
+### Mock Modeとは？
+
+デモには2つのモードがあります：
+
+| モード | APIキー | 用途 |
+|--------|---------|------|
+| **Mock Mode** | 不要 | 開発・テスト用。キーワードで疑似的にLLM応答を返す |
+| **Real API Mode** | 必要 | 本番テスト用。実際のOpenAI APIを使用 |
+
+**初心者はまずMock Modeで開発しましょう！** APIキー不要で、プラグインの動作確認ができます。
+
+### Mock Modeの仕組み
+
+```
+ユーザーが入力 → キーワードをチェック → マッチしたらツール呼び出し
+```
+
+例：ユーザーが「quiz を作って」と入力
+1. メッセージに「quiz」が含まれているかチェック
+2. 含まれていれば、`putQuestions`ツールを呼び出すモックレスポンスを返す
+3. プラグインが実行され、Viewに表示される
+
+### デフォルトのキーワード
+
+`demo/shared/chat-utils.ts`に定義されています：
+
+| キーワード | 動作 |
+|-----------|------|
+| `quiz`, `question` | Quizプラグインのツールを呼び出す |
+| `hello`, `hi` | テキストで挨拶を返す |
+| その他 | デフォルトのテキスト応答 |
+
+### 自分のプラグイン用にMockを追加する
+
+**これが重要！** 新しいプラグインを作ったら、Mock Modeでテストするためにモックレスポンスを追加します。
+
+`demo/shared/chat-utils.ts`を編集：
+
+```typescript
+export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
+  // 既存のquiz
+  quiz: {
+    toolCall: {
+      name: "putQuestions",
+      args: { /* ... */ },
+    },
+  },
+
+  // ✏️ 自分のプラグイン用を追加
+  greeting: {
+    toolCall: {
+      name: "greetingCard",  // TOOL_NAMEと一致させる
+      args: {
+        name: "田中",
+        message: "こんにちは！",
+      },
+    },
+  },
+
+  // ...
+};
+```
+
+次に、`findMockResponse`関数にキーワード判定を追加：
+
+```typescript
+export const findMockResponse = (
+  userMessage: string,
+  mockResponses: Record<string, MockResponse> = DEFAULT_MOCK_RESPONSES
+): MockResponse => {
+  const lowerMessage = userMessage.toLowerCase();
+
+  // 既存
+  if (lowerMessage.includes("quiz") || lowerMessage.includes("question")) {
+    return mockResponses.quiz || DEFAULT_MOCK_RESPONSES.quiz;
+  }
+
+  // ✏️ 自分のプラグイン用を追加
+  if (lowerMessage.includes("greeting") || lowerMessage.includes("挨拶")) {
+    return mockResponses.greeting || DEFAULT_MOCK_RESPONSES.default;
+  }
+
+  // ...
+};
+```
+
+### Mock Modeでテスト
+
+1. デモ画面で「Mock Mode」がONになっていることを確認
+2. チャットに「挨拶を作って」と入力
+3. キーワード「挨拶」がマッチ → greetingCardツールが呼ばれる
+4. プラグインが実行され、Viewに表示される
+
+### Real API Modeに切り替え
+
+本番に近い動作を確認したい場合：
+
+1. `.env`ファイルを作成：
+   ```bash
+   echo "VITE_OPENAI_API_KEY=sk-your-api-key" > .env
+   ```
+2. デモを再起動：`yarn dev`
+3. 「Mock Mode」をOFFに切り替え
+4. 自然な日本語で話しかける（「田中さんへの挨拶カードを作って」など）
+5. LLMが適切なタイミングでツールを自動的に呼び出す
 
 ## ステップ3: テンプレートを理解する
 
@@ -119,6 +227,50 @@ export interface GreetingArgs {
 
 ## ステップ6: Execute関数を実装する (plugin.ts)
 
+### Execute関数とは？
+
+Execute関数は**プラグインの心臓部**です。LLMがツールを呼び出したときに実行されます。
+
+```
+LLMが「greetingCardツールを使おう」と判断
+    ↓
+execute(context, args) が呼ばれる
+    ↓
+ToolResultを返す
+    ↓
+View/Previewコンポーネントに表示される
+    ↓
+LLMにも結果が伝えられ、次の応答を生成
+```
+
+### Execute関数の引数
+
+```typescript
+execute(context: ToolContext, args: GreetingArgs): Promise<ToolResult>
+```
+
+| 引数 | 説明 |
+|------|------|
+| `context` | 実行コンテキスト。`currentResult`（前回の結果）などを含む |
+| `args` | LLMが渡した引数。definition.tsで定義したパラメータに基づく |
+
+### ToolResultの構造（戻り値）
+
+```typescript
+interface ToolResult<T, J> {
+  toolName: string;      // 必須: TOOL_NAMEと一致させる
+  message: string;       // 必須: LLMへの簡潔なステータス
+  data?: T;              // UI専用データ（Viewコンポーネントで使用）
+  jsonData?: J;          // LLMに見えるデータ（応答生成に使用）
+  title?: string;        // 結果のタイトル（サイドバーに表示）
+  instructions?: string; // LLMへの指示（「ユーザーに結果を説明して」など）
+}
+```
+
+**重要な違い:**
+- `data`: Viewコンポーネントでのみ使用。LLMには送信されない（大きなデータも可）
+- `jsonData`: LLMに送信される。LLMがこのデータを見て応答を生成する
+
 `src/core/plugin.ts` を編集：
 
 ```typescript
@@ -133,8 +285,8 @@ export { TOOL_NAME, TOOL_DEFINITION, SYSTEM_PROMPT } from "./definition";
  * Execute関数 - LLMがこのツールを呼び出すと実行される
  */
 export const executeGreeting = async (
-  _context: ToolContext,
-  args: GreetingArgs,
+  _context: ToolContext,  // 今回は使わないので_をつける
+  args: GreetingArgs,     // LLMが渡した引数
 ): Promise<ToolResult<GreetingData, never>> => {
   const { name, message } = args;
 
@@ -146,9 +298,9 @@ export const executeGreeting = async (
   };
 
   return {
-    toolName: TOOL_NAME,
-    message: `${name}さんへのグリーティングカードを作成しました`,
-    data: greetingData,
+    toolName: TOOL_NAME,  // 必須！definition.tsのTOOL_NAMEと一致
+    message: `${name}さんへのグリーティングカードを作成しました`,  // LLMへの報告
+    data: greetingData,   // Viewコンポーネント用
     instructions: "グリーティングカードが作成されたことをユーザーに伝えてください。",
   };
 };
@@ -166,11 +318,32 @@ export const pluginCore: ToolPluginCore<GreetingData, never, GreetingArgs> = {
 };
 ```
 
-**ポイント：**
-- `execute()` はLLMから`args`を受け取る
-- Viewコンポーネント用の`data`を含む`ToolResult`を返す
-- `message`はLLMに送り返される
-- `instructions`はLLMに次に何を言うか伝える
+### pluginCoreの各パラメータ
+
+| パラメータ | 必須 | 説明 |
+|-----------|------|------|
+| `toolDefinition` | ✅ | LLM用のツール定義（definition.tsからインポート） |
+| `execute` | ✅ | ツール実行関数 |
+| `generatingMessage` | | 実行中に表示するメッセージ |
+| `isEnabled` | | ツールが有効かどうかを返す関数。`() => true`で常に有効 |
+| `systemPrompt` | | LLMのシステムプロンプトに追加するテキスト |
+| `samples` | | Quick Samplesに表示するテストデータ |
+
+**よくある間違い:**
+```typescript
+// ❌ 間違い - toolNameがない
+return {
+  message: "完了しました",
+  data: greetingData,
+};
+
+// ✅ 正しい - toolNameは必須
+return {
+  toolName: TOOL_NAME,  // これがないとViewに表示されない！
+  message: "完了しました",
+  data: greetingData,
+};
+```
 
 ## ステップ7: テストサンプルを追加する (samples.ts)
 
@@ -334,7 +507,7 @@ export default { plugin };
 ## ステップ12: プラグインをテストする
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 1. Quick Samplesの「シンプルな挨拶」をクリック
@@ -343,10 +516,14 @@ npm run dev
 
 ## ステップ13: チャットでテストする
 
-デモで：
-1. 「田中さんへの挨拶を作って」と入力
-2. Mockモードでは、「greeting 田中」と入力してプラグインをトリガー
-3. Real APIモード（OpenAIキー使用時）では、LLMが自動的にツールを呼び出す
+ステップ2.5で説明したMock Modeを使ってテストします：
+
+1. `demo/shared/chat-utils.ts`にgreetingのモックレスポンスを追加（ステップ2.5参照）
+2. デモ画面で「Mock Mode」がONになっていることを確認
+3. チャットに「挨拶を作って」と入力
+4. グリーティングカードが表示される！
+
+Real API Modeでもテストしたい場合は、ステップ2.5の「Real API Modeに切り替え」を参照してください。
 
 ## トラブルシューティング
 
@@ -368,7 +545,7 @@ npm run dev
 
 以下を実行：
 ```bash
-npm run typecheck
+yarn typecheck
 ```
 
 型とコンポーネントpropsの間の不一致を修正する。

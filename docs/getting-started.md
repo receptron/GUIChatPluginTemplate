@@ -10,7 +10,7 @@ A simple "Greeting Card" plugin that:
 
 ## Prerequisites
 
-- Node.js 18+ installed
+- Node.js 22+ installed
 - Basic knowledge of TypeScript
 - Basic knowledge of Vue or React
 
@@ -22,13 +22,13 @@ git clone https://github.com/receptron/GUIChatPluginTemplate.git GUIChatPluginGr
 cd GUIChatPluginGreeting
 
 # Install dependencies
-npm install
+yarn install
 ```
 
 ## Step 2: Run the Demo
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 Open http://localhost:5173. You'll see the Quiz demo working.
@@ -37,6 +37,114 @@ Open http://localhost:5173. You'll see the Quiz demo working.
 1. Click "Simple Quiz" button in the Quick Samples section
 2. See the Quiz View appear
 3. Answer the questions
+
+## Step 2.5: Understanding Mock Mode (Important)
+
+### What is Mock Mode?
+
+The demo has two modes:
+
+| Mode | API Key | Purpose |
+|------|---------|---------|
+| **Mock Mode** | Not required | For development/testing. Returns simulated LLM responses based on keywords |
+| **Real API Mode** | Required | For production testing. Uses actual OpenAI API |
+
+**Beginners should start with Mock Mode!** No API key needed, and you can test your plugin immediately.
+
+### How Mock Mode Works
+
+```
+User types message → Check for keywords → If match, trigger tool call
+```
+
+Example: User types "create a quiz"
+1. Check if message contains "quiz"
+2. If yes, return a mock response that calls the `putQuestions` tool
+3. Plugin executes and displays in View
+
+### Default Keywords
+
+Defined in `demo/shared/chat-utils.ts`:
+
+| Keyword | Behavior |
+|---------|----------|
+| `quiz`, `question` | Calls the Quiz plugin's tool |
+| `hello`, `hi` | Returns a text greeting |
+| Others | Returns default text response |
+
+### Adding Mock for Your Plugin
+
+**This is important!** When you create a new plugin, add a mock response to test it in Mock Mode.
+
+Edit `demo/shared/chat-utils.ts`:
+
+```typescript
+export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
+  // Existing quiz
+  quiz: {
+    toolCall: {
+      name: "putQuestions",
+      args: { /* ... */ },
+    },
+  },
+
+  // ✏️ Add your plugin's mock
+  greeting: {
+    toolCall: {
+      name: "greetingCard",  // Must match TOOL_NAME
+      args: {
+        name: "Alice",
+        message: "Hello!",
+      },
+    },
+  },
+
+  // ...
+};
+```
+
+Then add keyword matching to `findMockResponse` function:
+
+```typescript
+export const findMockResponse = (
+  userMessage: string,
+  mockResponses: Record<string, MockResponse> = DEFAULT_MOCK_RESPONSES
+): MockResponse => {
+  const lowerMessage = userMessage.toLowerCase();
+
+  // Existing
+  if (lowerMessage.includes("quiz") || lowerMessage.includes("question")) {
+    return mockResponses.quiz || DEFAULT_MOCK_RESPONSES.quiz;
+  }
+
+  // ✏️ Add your plugin's keywords
+  if (lowerMessage.includes("greeting") || lowerMessage.includes("hello card")) {
+    return mockResponses.greeting || DEFAULT_MOCK_RESPONSES.default;
+  }
+
+  // ...
+};
+```
+
+### Testing in Mock Mode
+
+1. Make sure "Mock Mode" is ON in the demo UI
+2. Type "create a greeting" in the chat
+3. Keyword "greeting" matches → greetingCard tool is called
+4. Plugin executes and displays in View
+
+### Switching to Real API Mode
+
+When you want to test with actual LLM:
+
+1. Create a `.env` file:
+   ```bash
+   echo "VITE_OPENAI_API_KEY=sk-your-api-key" > .env
+   ```
+2. Restart the demo: `yarn dev`
+3. Turn OFF "Mock Mode" in the UI
+4. Type naturally ("Create a greeting card for John")
+5. The LLM will automatically call your tool when appropriate
 
 ## Step 3: Understand the Template
 
@@ -119,6 +227,50 @@ export interface GreetingArgs {
 
 ## Step 6: Implement Execute Function (plugin.ts)
 
+### What is the Execute Function?
+
+The Execute function is **the heart of your plugin**. It runs when the LLM calls your tool.
+
+```
+LLM decides "I'll use the greetingCard tool"
+    ↓
+execute(context, args) is called
+    ↓
+Returns ToolResult
+    ↓
+Displayed in View/Preview components
+    ↓
+Result is also sent to LLM for next response
+```
+
+### Execute Function Arguments
+
+```typescript
+execute(context: ToolContext, args: GreetingArgs): Promise<ToolResult>
+```
+
+| Argument | Description |
+|----------|-------------|
+| `context` | Execution context. Contains `currentResult` (previous result), etc. |
+| `args` | Arguments from LLM. Based on parameters defined in definition.ts |
+
+### ToolResult Structure (Return Value)
+
+```typescript
+interface ToolResult<T, J> {
+  toolName: string;      // Required: Must match TOOL_NAME
+  message: string;       // Required: Brief status for LLM
+  data?: T;              // UI-only data (used by View component)
+  jsonData?: J;          // Data visible to LLM (used for response generation)
+  title?: string;        // Result title (shown in sidebar)
+  instructions?: string; // Instructions for LLM ("Tell the user...", etc.)
+}
+```
+
+**Important Difference:**
+- `data`: Used only by View component. NOT sent to LLM (can be large)
+- `jsonData`: Sent to LLM. LLM sees this data when generating its response
+
 Edit `src/core/plugin.ts`:
 
 ```typescript
@@ -133,8 +285,8 @@ export { TOOL_NAME, TOOL_DEFINITION, SYSTEM_PROMPT } from "./definition";
  * Execute function - runs when LLM calls this tool
  */
 export const executeGreeting = async (
-  _context: ToolContext,
-  args: GreetingArgs,
+  _context: ToolContext,  // Not used here, so prefix with _
+  args: GreetingArgs,     // Arguments from LLM
 ): Promise<ToolResult<GreetingData, never>> => {
   const { name, message } = args;
 
@@ -146,9 +298,9 @@ export const executeGreeting = async (
   };
 
   return {
-    toolName: TOOL_NAME,
-    message: `Greeting card created for ${name}`,
-    data: greetingData,
+    toolName: TOOL_NAME,  // Required! Must match TOOL_NAME from definition.ts
+    message: `Greeting card created for ${name}`,  // Report to LLM
+    data: greetingData,   // For View component
     instructions: "Tell the user that the greeting card has been created.",
   };
 };
@@ -166,11 +318,32 @@ export const pluginCore: ToolPluginCore<GreetingData, never, GreetingArgs> = {
 };
 ```
 
-**Key Points:**
-- `execute()` receives `args` from LLM
-- Returns `ToolResult` with `data` for the View component
-- `message` is sent back to LLM
-- `instructions` tells LLM what to say next
+### pluginCore Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `toolDefinition` | ✅ | Tool definition for LLM (imported from definition.ts) |
+| `execute` | ✅ | Tool execution function |
+| `generatingMessage` | | Message displayed while executing |
+| `isEnabled` | | Function returning whether tool is enabled. `() => true` = always enabled |
+| `systemPrompt` | | Text added to LLM's system prompt |
+| `samples` | | Test data shown in Quick Samples |
+
+**Common Mistake:**
+```typescript
+// ❌ Wrong - missing toolName
+return {
+  message: "Completed",
+  data: greetingData,
+};
+
+// ✅ Correct - toolName is required
+return {
+  toolName: TOOL_NAME,  // Without this, View won't display!
+  message: "Completed",
+  data: greetingData,
+};
+```
 
 ## Step 7: Add Test Samples (samples.ts)
 
@@ -334,7 +507,7 @@ Edit `package.json`:
 ## Step 12: Test Your Plugin
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 1. Click "Simple Greeting" in Quick Samples
@@ -343,10 +516,14 @@ npm run dev
 
 ## Step 13: Test with Chat
 
-In the demo:
-1. Type "Create a greeting for John"
-2. In Mock Mode, type "greeting John" to trigger the plugin
-3. In Real API Mode (with OpenAI key), the LLM will call your tool automatically
+Use Mock Mode as explained in Step 2.5:
+
+1. Add the greeting mock response to `demo/shared/chat-utils.ts` (see Step 2.5)
+2. Make sure "Mock Mode" is ON in the demo UI
+3. Type "create a greeting" in the chat
+4. Your greeting card appears!
+
+To test with Real API Mode, see "Switching to Real API Mode" in Step 2.5.
 
 ## Troubleshooting
 
@@ -368,7 +545,7 @@ Check that:
 
 Run:
 ```bash
-npm run typecheck
+yarn typecheck
 ```
 
 Fix any type mismatches between your types and component props.
