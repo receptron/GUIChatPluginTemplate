@@ -14,7 +14,69 @@ A simple "Greeting Card" plugin that:
 - Basic knowledge of TypeScript
 - Basic knowledge of Vue or React
 
+## Big Picture: How Plugins Work
+
+Before starting, let's understand the overall flow.
+
+### How a Plugin Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ User: "Create a greeting card for Alice"                        │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ LLM: "I'll use the greetingCard tool"                           │
+│      Decides based on definition.ts info                        │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ execute function is called (plugin.ts)                          │
+│   - Receives args: { name: "Alice" }                            │
+│   - Returns ToolResult                                          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ Displayed on screen                                             │
+│   - View.vue: Main display (greeting card)                      │
+│   - Preview.vue: Sidebar thumbnail                              │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ LLM: "I've created a greeting card for Alice!"                  │
+│      Responds based on ToolResult.message and instructions      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### File Dependencies
+
+```
+definition.ts ─────┐
+   │               │
+   │ TOOL_NAME     │ TOOL_DEFINITION
+   ↓               ↓
+types.ts ──────→ plugin.ts ──────→ samples.ts
+   │               │
+   │ Type defs     │ execute, pluginCore
+   ↓               ↓
+View.vue ←─────────┘
+Preview.vue
+```
+
+**Dependency Flow:**
+1. `definition.ts`: Define tool name and parameters (create first)
+2. `types.ts`: Define data types (match definition.ts parameters)
+3. `plugin.ts`: Execution logic (uses types.ts types)
+4. `samples.ts`: Test data (matches types.ts types)
+5. `View.vue/Preview.vue`: UI (uses types.ts types to display data)
+
+---
+
 ## Step 1: Set Up the Project
+
+**Purpose of this step:** Prepare the development environment
+
+**Impact:** Foundation for all subsequent steps
 
 ```bash
 # Clone the template
@@ -25,7 +87,15 @@ cd GUIChatPluginGreeting
 yarn install
 ```
 
+> **Why clone?**
+> The template includes all configurations needed for plugin development (TypeScript, Vite, Tailwind CSS).
+> It's much easier to modify this template than to start from scratch.
+
 ## Step 2: Run the Demo
+
+**Purpose of this step:** Verify the template works correctly
+
+**Depends on:** Step 1 (yarn install must be complete)
 
 ```bash
 yarn dev
@@ -38,18 +108,35 @@ Open http://localhost:5173. You'll see the Quiz demo working.
 2. See the Quiz View appear
 3. Answer the questions
 
+> **Why try the demo?**
+> Before creating your own plugin, experience how a plugin works with the existing Quiz plugin.
+> This gives you a mental image of what your completed plugin will look like.
+
 ## Step 2.5: Understanding Mock Mode (Important)
 
 ### What is Mock Mode?
+
+Mock Mode **mimics LLM behavior without using the actual LLM**.
+
+```
+Real API Mode:  User input → OpenAI API → Wait seconds → LLM decides → Tool call
+Mock Mode:      User input → Keyword check → Instantly → Tool call
+```
+
+**Benefits of Mock Mode:**
+- No API key needed (develop for free)
+- Responses return instantly (no waiting)
+- No API costs
+- Works offline
+
+**Start development with Mock Mode, then test with Real API Mode once it's working** - this is the recommended workflow.
 
 The demo has two modes:
 
 | Mode | API Key | Purpose |
 |------|---------|---------|
-| **Mock Mode** | Not required | For development/testing. Returns simulated LLM responses based on keywords |
-| **Real API Mode** | Required | For production testing. Uses actual OpenAI API |
-
-**Beginners should start with Mock Mode!** No API key needed, and you can test your plugin immediately.
+| **Mock Mode** | Not required | For development/testing. Returns simulated LLM responses instantly based on keywords |
+| **Real API Mode** | Required | For production testing. Uses actual OpenAI API (takes seconds) |
 
 ### How Mock Mode Works
 
@@ -148,21 +235,52 @@ When you want to test with actual LLM:
 
 ## Step 3: Understand the Template
 
+**Purpose of this step:** Know what to edit and where
+
+**Depends on:** None (knowledge step)
+
 Before making changes, let's understand what each file does:
 
 ```
 src/
 ├── core/                    # Plugin logic (no UI)
-│   ├── definition.ts        # Tool name & parameters
-│   ├── plugin.ts           # Main execute function
-│   ├── types.ts            # TypeScript types
-│   └── samples.ts          # Test data
+│   ├── definition.ts        # ① Tool name & parameters (LLM sees this)
+│   ├── types.ts            # ② TypeScript types (used everywhere)
+│   ├── plugin.ts           # ③ Main execute function
+│   └── samples.ts          # ④ Test data
 └── vue/                     # Vue UI components
-    ├── View.vue            # Main display
-    └── Preview.vue         # Thumbnail
+    ├── View.vue            # ⑤ Main display
+    └── Preview.vue         # ⑥ Thumbnail
 ```
 
+> **Edit order matters!**
+> Edit in the numbered order above to avoid dependency errors.
+> Example: If you don't create types.ts first, plugin.ts will have type errors.
+
+---
+
 ## Step 4: Define Your Tool (definition.ts)
+
+**Purpose of this step:** Tell the LLM "what this tool can do"
+
+**Impact:**
+- LLM uses this to decide when to use your tool
+- Items defined in `parameters` are passed as `args` to the execute function
+
+**Depends on:** None (create this file first)
+
+### Why is this file important?
+
+```
+User: "Create a greeting card for Alice"
+                    ↓
+LLM: Reads description from definition.ts
+     "Create a personalized greeting card with a custom message"
+     → Decides this tool is appropriate
+                    ↓
+LLM: Looks at parameters to build arguments
+     { name: "Alice" }
+```
 
 Edit `src/core/definition.ts`:
 
@@ -170,26 +288,29 @@ Edit `src/core/definition.ts`:
 import type { ToolDefinition } from "gui-chat-protocol";
 
 // Tool name (used to identify results)
+// ⚠️ Important: This name must be unique. Also used in execute() return value
 export const TOOL_NAME = "greetingCard";
 
 // Tool definition for LLM
 export const TOOL_DEFINITION: ToolDefinition = {
   type: "function",
   name: TOOL_NAME,
+  // ⚠️ description: LLM reads this to decide whether to use the tool
   description: "Create a personalized greeting card with a custom message",
   parameters: {
     type: "object",
     properties: {
+      // ⚠️ Parameters defined here become args in execute(context, args)
       name: {
         type: "string",
-        description: "The name of the person to greet",
+        description: "The name of the person to greet",  // LLM uses this to determine value
       },
       message: {
         type: "string",
         description: "Optional custom message",
       },
     },
-    required: ["name"],
+    required: ["name"],  // Required parameters
   },
 };
 
@@ -202,13 +323,37 @@ export const SYSTEM_PROMPT = `When the user wants to create a greeting or send a
 - `description`: Tells LLM when to use this tool
 - `parameters`: What inputs the tool accepts
 
+---
+
 ## Step 5: Define Types (types.ts)
+
+**Purpose of this step:** Define TypeScript types for consistency across all code
+
+**Impact:**
+- `plugin.ts`: Types for execute function args and return value
+- `View.vue/Preview.vue`: Types for displayed data
+- `samples.ts`: Types for test data
+
+**Depends on:** Step 4 (match definition.ts parameters)
+
+### Why are type definitions needed?
+
+```
+Defined in definition.ts:         Type definition in types.ts:
+parameters: {                     interface GreetingArgs {
+  name: string,             →       name: string;
+  message?: string                  message?: string;
+}                                 }
+```
+
+The `parameters` in definition.ts must correspond to the `Args` type in types.ts.
 
 Edit `src/core/types.ts`:
 
 ```typescript
 /**
  * Data for View/Preview components
+ * Type of ToolResult.data returned by execute()
  */
 export interface GreetingData {
   name: string;
@@ -218,14 +363,32 @@ export interface GreetingData {
 
 /**
  * Arguments passed to execute function
+ * ⚠️ Must match parameters in definition.ts
  */
 export interface GreetingArgs {
-  name: string;
-  message?: string;
+  name: string;       // required: ["name"] so this is required
+  message?: string;   // Not in required, so optional (add ?)
 }
 ```
 
+> **What happens if types don't match?**
+> - TypeScript errors
+> - Data not passed correctly at runtime
+> - Display errors in View component
+
+---
+
 ## Step 6: Implement Execute Function (plugin.ts)
+
+**Purpose of this step:** Write the logic that runs when the tool is called
+
+**Impact:**
+- Return value's `data` is passed to View.vue
+- Return value's `message` and `instructions` are sent to LLM
+
+**Depends on:**
+- Step 4: Uses `TOOL_NAME`
+- Step 5: Uses `GreetingData`, `GreetingArgs` types
 
 ### What is the Execute Function?
 
@@ -347,6 +510,25 @@ return {
 
 ## Step 7: Add Test Samples (samples.ts)
 
+**Purpose of this step:** Define test data for Quick Samples buttons
+
+**Impact:** Buttons appear in the "Quick Samples" section of the demo
+
+**Depends on:** Step 5 (must match GreetingArgs type)
+
+### What are Samples?
+
+```
+Quick Samples in demo:
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ Simple Greeting │ │ Custom Message  │ │ Welcome Card    │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
+        ↓ Click
+execute({ name: "Alice" }) is called
+```
+
+A convenient way to test your plugin without using chat.
+
 Edit `src/core/samples.ts`:
 
 ```typescript
@@ -354,8 +536,9 @@ import type { ToolSample } from "gui-chat-protocol";
 
 export const SAMPLES: ToolSample[] = [
   {
-    name: "Simple Greeting",
+    name: "Simple Greeting",  // Name shown on button
     args: {
+      // ⚠️ Must match GreetingArgs type
       name: "Alice",
     },
   },
@@ -376,7 +559,35 @@ export const SAMPLES: ToolSample[] = [
 ];
 ```
 
+> **Samples not working?**
+> Check that the `args` content matches your `GreetingArgs` type.
+
+---
+
 ## Step 8: Create the View Component (Vue)
+
+**Purpose of this step:** Create the main UI for your plugin
+
+**Impact:** execute()'s result is displayed here
+
+**Depends on:**
+- Step 4: Uses `TOOL_NAME` to filter results
+- Step 5: Uses `GreetingData` type to receive data
+- Step 6: Receives `data` returned by `execute()`
+
+### View Component Data Flow
+
+```
+execute() returns:              View.vue receives:
+{                               props.selectedResult
+  toolName: "greetingCard",       │
+  data: {                         ↓
+    name: "Alice",        →    greetingData = {
+    message: "...",              name: "Alice",
+    createdAt: "..."             message: "...",
+  }                              createdAt: "..."
+}                              }
+```
 
 Edit `src/vue/View.vue`:
 
@@ -435,6 +646,28 @@ watch(
 
 ## Step 9: Create the Preview Component (Vue)
 
+**Purpose of this step:** Create a small thumbnail for the sidebar
+
+**Impact:** Shown in the sidebar results list
+
+**Depends on:** Step 5 (uses GreetingData type)
+
+### What is Preview?
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ Sidebar                      │        Main Screen        │
+│ ┌─────────────┐              │                           │
+│ │ 🎉          │ ← Preview    │   ┌───────────────────┐   │
+│ │ Alice       │              │   │                   │   │
+│ └─────────────┘              │   │   View.vue        │   │
+│ ┌─────────────┐              │   │   content         │   │
+│ │ 🎉          │              │   │                   │   │
+│ │ Bob         │              │   └───────────────────┘   │
+│ └─────────────┘              │                           │
+└──────────────────────────────────────────────────────────┘
+```
+
 Edit `src/vue/Preview.vue`:
 
 ```vue
@@ -452,12 +685,34 @@ import type { ToolResult } from "gui-chat-protocol/vue";
 import type { GreetingData } from "../core/types";
 
 defineProps<{
-  result: ToolResult<GreetingData>;
+  result: ToolResult<GreetingData>;  // Receives entire return value from execute()
 }>();
 </script>
 ```
 
+> **Keep Preview simple!**
+> It's a thumbnail, so only show minimal information.
+
+---
+
 ## Step 10: Update Exports
+
+**Purpose of this step:** Make created modules available for external use
+
+**Impact:** Other projects can import your plugin after npm publish
+
+**Depends on:** All of Steps 4-9 (bundles all modules)
+
+### Why are exports needed?
+
+```
+When used from MulmoChat:
+import Plugin from "@gui-chat-plugin/greeting/vue";
+                                      ↑
+                            Exports from src/vue/index.ts
+```
+
+🚫 **This file usually doesn't need editing.** Use the template as-is.
 
 ### src/core/index.ts
 
@@ -493,7 +748,15 @@ export { View, Preview };
 export default { plugin };
 ```
 
+---
+
 ## Step 11: Update package.json
+
+**Purpose of this step:** Set the package name
+
+**Impact:** This becomes your npm package name
+
+**Depends on:** None
 
 Edit `package.json`:
 
@@ -504,7 +767,16 @@ Edit `package.json`:
 }
 ```
 
+> **Naming convention**
+> Starting with `@gui-chat-plugin/` gives consistency with other GUIChat plugins.
+
+---
+
 ## Step 12: Test Your Plugin
+
+**Purpose of this step:** Verify with Quick Samples
+
+**Depends on:** All Steps 1-10 must be complete
 
 ```bash
 yarn dev
@@ -516,6 +788,20 @@ yarn dev
 
 ## Step 13: Test with Chat
 
+**Purpose of this step:** Test with chat-like interaction
+
+**Depends on:**
+- Step 12 is successful
+- Understanding Mock Mode from Step 2.5
+
+### Difference from Quick Samples
+
+```
+Quick Samples:     Button click → execute() runs immediately
+Mock Mode Chat:    Text input → Keyword match → execute() runs
+Real API Mode:     Text input → LLM decides → execute() runs
+```
+
 Use Mock Mode as explained in Step 2.5:
 
 1. Add the greeting mock response to `demo/shared/chat-utils.ts` (see Step 2.5)
@@ -524,6 +810,8 @@ Use Mock Mode as explained in Step 2.5:
 4. Your greeting card appears!
 
 To test with Real API Mode, see "Switching to Real API Mode" in Step 2.5.
+
+---
 
 ## Troubleshooting
 

@@ -14,7 +14,69 @@
 - TypeScriptの基本知識
 - VueまたはReactの基本知識
 
+## 全体像：プラグインの仕組み
+
+プラグイン開発を始める前に、全体の流れを理解しましょう。
+
+### プラグインが動作する仕組み
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ ユーザー: 「田中さんへの挨拶カードを作って」                      │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ LLM: 「greetingCardツールを使おう」                              │
+│      definition.ts の情報を見て判断                              │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ execute関数が呼ばれる (plugin.ts)                                │
+│   - args: { name: "田中" } を受け取る                            │
+│   - ToolResult を返す                                           │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 画面に表示                                                       │
+│   - View.vue: メインの表示（グリーティングカード）                │
+│   - Preview.vue: サイドバーのサムネイル                          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ LLM: 「田中さんへのグリーティングカードを作成しました！」          │
+│      ToolResult.message と instructions を見て応答               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### ファイル間の依存関係
+
+```
+definition.ts ─────┐
+   │               │
+   │ TOOL_NAME     │ TOOL_DEFINITION
+   ↓               ↓
+types.ts ──────→ plugin.ts ──────→ samples.ts
+   │               │
+   │ 型定義        │ execute, pluginCore
+   ↓               ↓
+View.vue ←─────────┘
+Preview.vue
+```
+
+**依存の流れ:**
+1. `definition.ts`: ツール名とパラメータを定義（最初に作る）
+2. `types.ts`: データの型を定義（definition.tsのパラメータに合わせる）
+3. `plugin.ts`: 実行ロジック（types.tsの型を使う）
+4. `samples.ts`: テストデータ（types.tsの型に合わせる）
+5. `View.vue/Preview.vue`: UI（types.tsの型を使ってデータを表示）
+
+---
+
 ## ステップ1: プロジェクトのセットアップ
+
+**このステップの目的:** 開発環境を準備する
+
+**影響:** すべての後続ステップの基盤
 
 ```bash
 # テンプレートをクローン
@@ -25,7 +87,15 @@ cd GUIChatPluginGreeting
 yarn install
 ```
 
+> **なぜクローンするの？**
+> テンプレートには、プラグイン開発に必要なすべての設定（TypeScript、Vite、Tailwind CSS）が含まれています。
+> ゼロから作るより、このテンプレートを元に変更する方がはるかに簡単です。
+
 ## ステップ2: デモを実行
+
+**このステップの目的:** テンプレートが正しく動作することを確認する
+
+**依存:** ステップ1（yarn installが完了していること）
 
 ```bash
 yarn dev
@@ -38,18 +108,35 @@ http://localhost:5173 を開きます。Quizデモが動作しているはずで
 2. Quiz Viewが表示される
 3. 質問に答える
 
+> **なぜデモを試すの？**
+> 自分のプラグインを作る前に、既存のQuizプラグインで「プラグインがどう動くか」を体験します。
+> これが後で作るプラグインの完成形のイメージになります。
+
 ## ステップ2.5: Mock Modeを理解する（重要）
 
 ### Mock Modeとは？
+
+Mock Modeは**実際のLLMを使わずに、LLMの動作を模倣する**モードです。
+
+```
+Real API Mode:  ユーザー入力 → OpenAI API → 数秒待つ → LLMが判断 → ツール呼び出し
+Mock Mode:      ユーザー入力 → キーワード判定 → 即座に → ツール呼び出し
+```
+
+**Mock Modeのメリット:**
+- APIキー不要（無料で開発できる）
+- レスポンスが即座に返る（待ち時間なし）
+- API料金がかからない
+- オフラインでも動作する
+
+**最初の開発はMock Modeで行い、動作確認ができたらReal API Modeでテストする**のがおすすめです。
 
 デモには2つのモードがあります：
 
 | モード | APIキー | 用途 |
 |--------|---------|------|
-| **Mock Mode** | 不要 | 開発・テスト用。キーワードで疑似的にLLM応答を返す |
-| **Real API Mode** | 必要 | 本番テスト用。実際のOpenAI APIを使用 |
-
-**初心者はまずMock Modeで開発しましょう！** APIキー不要で、プラグインの動作確認ができます。
+| **Mock Mode** | 不要 | 開発・テスト用。キーワードで疑似的にLLM応答を即座に返す |
+| **Real API Mode** | 必要 | 本番テスト用。実際のOpenAI APIを使用（数秒かかる） |
 
 ### Mock Modeの仕組み
 
@@ -148,21 +235,52 @@ export const findMockResponse = (
 
 ## ステップ3: テンプレートを理解する
 
+**このステップの目的:** 何をどこに書くか把握する
+
+**依存:** なし（知識のステップ）
+
 変更を加える前に、各ファイルの役割を理解しましょう：
 
 ```
 src/
 ├── core/                    # プラグインロジック（UIなし）
-│   ├── definition.ts        # ツール名とパラメータ
-│   ├── plugin.ts           # メインのexecute関数
-│   ├── types.ts            # TypeScript型
-│   └── samples.ts          # テストデータ
+│   ├── definition.ts        # ① ツール名とパラメータ（LLMが見る）
+│   ├── types.ts            # ② TypeScript型（全ファイルで使う）
+│   ├── plugin.ts           # ③ メインのexecute関数
+│   └── samples.ts          # ④ テストデータ
 └── vue/                     # Vue UIコンポーネント
-    ├── View.vue            # メイン表示
-    └── Preview.vue         # サムネイル
+    ├── View.vue            # ⑤ メイン表示
+    └── Preview.vue         # ⑥ サムネイル
 ```
 
+> **編集する順番が重要！**
+> 上の番号順に編集することで、依存関係のエラーを避けられます。
+> 例：types.tsを先に作らないと、plugin.tsで型エラーが出ます。
+
+---
+
 ## ステップ4: ツールを定義する (definition.ts)
+
+**このステップの目的:** LLMに「このツールは何ができるか」を伝える
+
+**影響:**
+- LLMがこのツールをいつ使うか判断する材料になる
+- `parameters`で定義した項目が、execute関数の`args`に渡される
+
+**依存:** なし（最初に作成するファイル）
+
+### なぜこのファイルが重要？
+
+```
+ユーザー: 「田中さんへの挨拶カードを作って」
+                    ↓
+LLM: definition.tsの description を読む
+     「カスタムメッセージ付きのパーソナライズされたグリーティングカードを作成」
+     → このツールが適切だと判断
+                    ↓
+LLM: parameters を見て引数を組み立てる
+     { name: "田中" }
+```
 
 `src/core/definition.ts` を編集：
 
@@ -170,26 +288,29 @@ src/
 import type { ToolDefinition } from "gui-chat-protocol";
 
 // ツール名（結果の識別に使用）
+// ⚠️ 重要: この名前はプロジェクト内で一意。execute()の戻り値でも使う
 export const TOOL_NAME = "greetingCard";
 
 // LLM向けのツール定義
 export const TOOL_DEFINITION: ToolDefinition = {
   type: "function",
   name: TOOL_NAME,
+  // ⚠️ description: LLMはこれを読んでツールを使うか判断する
   description: "カスタムメッセージ付きのパーソナライズされたグリーティングカードを作成",
   parameters: {
     type: "object",
     properties: {
+      // ⚠️ ここで定義したパラメータが execute(context, args) の args に入る
       name: {
         type: "string",
-        description: "挨拶する相手の名前",
+        description: "挨拶する相手の名前",  // LLMがこれを見て値を決める
       },
       message: {
         type: "string",
         description: "オプションのカスタムメッセージ",
       },
     },
-    required: ["name"],
+    required: ["name"],  // 必須パラメータ
   },
 };
 
@@ -204,11 +325,33 @@ export const SYSTEM_PROMPT = `ユーザーが挨拶を作成したい、また�
 
 ## ステップ5: 型を定義する (types.ts)
 
+**このステップの目的:** TypeScriptの型を定義し、コード全体で一貫性を保つ
+
+**影響:**
+- `plugin.ts`: execute関数の引数と戻り値の型
+- `View.vue/Preview.vue`: 表示するデータの型
+- `samples.ts`: テストデータの型
+
+**依存:** ステップ4（definition.tsのparametersに合わせる）
+
+### なぜ型定義が必要？
+
+```
+definition.ts で定義:         types.ts で型定義:
+parameters: {                 interface GreetingArgs {
+  name: string,         →       name: string;
+  message?: string              message?: string;
+}                             }
+```
+
+definition.tsの`parameters`と types.tsの`Args`は対応している必要があります。
+
 `src/core/types.ts` を編集：
 
 ```typescript
 /**
  * View/Previewコンポーネント用のデータ
+ * execute()が返すToolResult.dataの型
  */
 export interface GreetingData {
   name: string;
@@ -218,14 +361,32 @@ export interface GreetingData {
 
 /**
  * execute関数に渡される引数
+ * ⚠️ definition.ts の parameters と一致させる
  */
 export interface GreetingArgs {
-  name: string;
-  message?: string;
+  name: string;       // required: ["name"] なので必須
+  message?: string;   // required に含まれないのでオプション（?をつける）
 }
 ```
 
+> **型が一致しないとどうなる？**
+> - TypeScriptエラーが出る
+> - 実行時にデータが正しく渡らない
+> - Viewコンポーネントで表示エラーになる
+
+---
+
 ## ステップ6: Execute関数を実装する (plugin.ts)
+
+**このステップの目的:** ツールが呼ばれたときに実行される処理を書く
+
+**影響:**
+- 戻り値の`data`が View.vue に渡される
+- 戻り値の`message`と`instructions`が LLM に送られる
+
+**依存:**
+- ステップ4: `TOOL_NAME`を使う
+- ステップ5: `GreetingData`, `GreetingArgs`の型を使う
 
 ### Execute関数とは？
 
@@ -347,6 +508,25 @@ return {
 
 ## ステップ7: テストサンプルを追加する (samples.ts)
 
+**このステップの目的:** Quick Samplesボタンで使うテストデータを定義する
+
+**影響:** デモ画面の「Quick Samples」セクションにボタンが表示される
+
+**依存:** ステップ5（GreetingArgsの型に合わせる）
+
+### サンプルとは？
+
+```
+デモ画面の Quick Samples:
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ シンプルな挨拶  │ │カスタムメッセージ│ │ ようこそカード  │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
+        ↓ クリック
+execute({ name: "田中" }) が呼ばれる
+```
+
+チャットを使わずにプラグインをテストできる便利な機能です。
+
 `src/core/samples.ts` を編集：
 
 ```typescript
@@ -354,8 +534,9 @@ import type { ToolSample } from "gui-chat-protocol";
 
 export const SAMPLES: ToolSample[] = [
   {
-    name: "シンプルな挨拶",
+    name: "シンプルな挨拶",  // ボタンに表示される名前
     args: {
+      // ⚠️ GreetingArgs型と一致させる
       name: "田中",
     },
   },
@@ -376,7 +557,35 @@ export const SAMPLES: ToolSample[] = [
 ];
 ```
 
+> **サンプルが動かない？**
+> `args`の内容が`GreetingArgs`型と一致しているか確認してください。
+
+---
+
 ## ステップ8: Viewコンポーネントを作成する (Vue)
+
+**このステップの目的:** プラグインのメインUIを作成する
+
+**影響:** execute()の結果がここに表示される
+
+**依存:**
+- ステップ4: `TOOL_NAME`を使って結果をフィルタリング
+- ステップ5: `GreetingData`型でデータを受け取る
+- ステップ6: `execute()`が返した`data`を受け取る
+
+### Viewコンポーネントのデータフロー
+
+```
+execute()が返す:                View.vueが受け取る:
+{                               props.selectedResult
+  toolName: "greetingCard",       │
+  data: {                         ↓
+    name: "田中",         →    greetingData = {
+    message: "...",              name: "田中",
+    createdAt: "..."             message: "...",
+  }                              createdAt: "..."
+}                              }
+```
 
 `src/vue/View.vue` を編集：
 
@@ -435,6 +644,28 @@ watch(
 
 ## ステップ9: Previewコンポーネントを作成する (Vue)
 
+**このステップの目的:** サイドバーに表示する小さなサムネイルを作成する
+
+**影響:** サイドバーの結果一覧に表示される
+
+**依存:** ステップ5（GreetingData型を使用）
+
+### Previewとは？
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ サイドバー                   │        メイン画面          │
+│ ┌─────────────┐              │                           │
+│ │ 🎉          │ ← Preview    │   ┌───────────────────┐   │
+│ │ 田中        │              │   │                   │   │
+│ └─────────────┘              │   │   View.vue        │   │
+│ ┌─────────────┐              │   │   の内容          │   │
+│ │ 🎉          │              │   │                   │   │
+│ │ 佐藤        │              │   └───────────────────┘   │
+│ └─────────────┘              │                           │
+└──────────────────────────────────────────────────────────┘
+```
+
 `src/vue/Preview.vue` を編集：
 
 ```vue
@@ -452,12 +683,34 @@ import type { ToolResult } from "gui-chat-protocol/vue";
 import type { GreetingData } from "../core/types";
 
 defineProps<{
-  result: ToolResult<GreetingData>;
+  result: ToolResult<GreetingData>;  // execute()の戻り値全体が渡される
 }>();
 </script>
 ```
 
+> **Previewはシンプルに！**
+> サムネイルなので、必要最小限の情報だけ表示します。
+
+---
+
 ## ステップ10: エクスポートを更新する
+
+**このステップの目的:** 作成したモジュールを外部から使えるようにする
+
+**影響:** npm公開時に他のプロジェクトからインポートできるようになる
+
+**依存:** ステップ4〜9のすべて（各モジュールをまとめる）
+
+### なぜエクスポートが必要？
+
+```
+MulmoChatから使う場合:
+import Plugin from "@gui-chat-plugin/greeting/vue";
+                                      ↑
+                            src/vue/index.ts のエクスポート
+```
+
+🚫 **このファイルは基本的に編集不要です。** テンプレートのまま使えます。
 
 ### src/core/index.ts
 
@@ -493,7 +746,15 @@ export { View, Preview };
 export default { plugin };
 ```
 
+---
+
 ## ステップ11: package.jsonを更新する
+
+**このステップの目的:** パッケージ名を設定する
+
+**影響:** npm公開時のパッケージ名になる
+
+**依存:** なし
 
 `package.json` を編集：
 
@@ -504,7 +765,16 @@ export default { plugin };
 }
 ```
 
+> **命名規則**
+> `@gui-chat-plugin/` で始めると、他のGUIChatプラグインと統一感が出ます。
+
+---
+
 ## ステップ12: プラグインをテストする
+
+**このステップの目的:** Quick Samplesで動作確認する
+
+**依存:** ステップ1〜10がすべて完了していること
 
 ```bash
 yarn dev
@@ -516,6 +786,20 @@ yarn dev
 
 ## ステップ13: チャットでテストする
 
+**このステップの目的:** 実際のチャット風の操作でテストする
+
+**依存:**
+- ステップ12が成功していること
+- ステップ2.5でMock Modeを理解していること
+
+### Quick Samplesとの違い
+
+```
+Quick Samples:     ボタンクリック → 即座にexecute()実行
+Mock Mode Chat:    テキスト入力 → キーワードマッチ → execute()実行
+Real API Mode:     テキスト入力 → LLMが判断 → execute()実行
+```
+
 ステップ2.5で説明したMock Modeを使ってテストします：
 
 1. `demo/shared/chat-utils.ts`にgreetingのモックレスポンスを追加（ステップ2.5参照）
@@ -524,6 +808,8 @@ yarn dev
 4. グリーティングカードが表示される！
 
 Real API Modeでもテストしたい場合は、ステップ2.5の「Real API Modeに切り替え」を参照してください。
+
+---
 
 ## トラブルシューティング
 
