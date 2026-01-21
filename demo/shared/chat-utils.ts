@@ -137,11 +137,11 @@ export const buildToolsParam = (
 /**
  * Execute plugin and return result
  */
-export const executePluginWithContext = async <T, J, A>(
-  execute: (context: ToolContext, args: A) => Promise<ToolResult<T, J>>,
-  args: A,
+export const executePluginWithContext = async (
+  execute: (context: ToolContext, args: unknown) => Promise<ToolResult>,
+  args: unknown,
   currentResult: ToolResult | null
-): Promise<ToolResult<T, J>> => {
+): Promise<ToolResult> => {
   const context: ToolContext = {
     currentResult,
   };

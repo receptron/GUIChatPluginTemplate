@@ -2,7 +2,7 @@
  * useChat - React hook for plugin demo chat
  */
 import { useState, useCallback, useMemo } from "react";
-import type { ToolPluginReact, ToolResult } from "gui-chat-protocol/react";
+import type { ToolPluginReact, ToolResult, ToolContext } from "gui-chat-protocol/react";
 import {
   type ChatMessage,
   loadApiKey,
@@ -46,7 +46,8 @@ export function useChat(options: UseChatOptions) {
    */
   const executePlugin = useCallback(
     async (args: unknown): Promise<ToolResult> => {
-      return await executePluginWithContext(plugin.execute, args, result);
+      const execute = plugin.execute as (context: ToolContext, args: unknown) => Promise<ToolResult>;
+      return await executePluginWithContext(execute, args, result);
     },
     [plugin, result]
   );

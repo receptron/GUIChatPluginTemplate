@@ -2,7 +2,7 @@
  * useChat - Vue composable for plugin demo chat
  */
 import { ref, computed } from "vue";
-import type { ToolPlugin, ToolResult } from "gui-chat-protocol/vue";
+import type { ToolPlugin, ToolResult, ToolContext } from "gui-chat-protocol/vue";
 import {
   type ChatMessage,
   loadApiKey,
@@ -45,7 +45,8 @@ export function useChat(options: UseChatOptions) {
    * Execute plugin with given arguments
    */
   const executePlugin = async (args: unknown): Promise<ToolResult> => {
-    return await executePluginWithContext(plugin.execute, args, result.value);
+    const execute = plugin.execute as (context: ToolContext, args: unknown) => Promise<ToolResult>;
+    return await executePluginWithContext(execute, args, result.value);
   };
 
   /**
