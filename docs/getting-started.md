@@ -323,9 +323,68 @@ src/
 
 **Impact:**
 - LLM uses this to decide when to use your tool
-- Items defined in `parameters` are passed as `args` to the execute function
+- **LLM reads `parameters` to understand what data is needed, then creates appropriate args**
+- Those args are passed to the execute function
 
 **Depends on:** None (create this file first)
+
+### How the LLM Creates Args
+
+```
+User: "Create a greeting card for Alice"
+                    ↓
+LLM: Reads definition.ts
+     1. Sees description → decides "this tool is appropriate"
+     2. Sees parameters → understands "name and message are needed"
+     3. Extracts values from user's message to create args
+                    ↓
+Args created by LLM: { name: "Alice", message: undefined }
+                    ↓
+execute(context, args) is called
+```
+
+In other words, **definition.ts is an instruction manual for the LLM**. The LLM reads it to:
+1. Decide when to use this tool (description)
+2. Understand what data to pass (parameters)
+3. Extract appropriate values from the user's message and build args
+
+### About JSON Schema
+
+The `parameters` field is written in **JSON Schema**, a standard format for defining data structures. It's also used by OpenAI's Function Calling.
+
+**Basic syntax:**
+
+```typescript
+parameters: {
+  type: "object",           // Always "object"
+  properties: {             // Property (argument) definitions
+    name: {
+      type: "string",       // Types: "string", "number", "boolean", "array", "object"
+      description: "desc",  // LLM uses this to determine the value
+    },
+    age: {
+      type: "number",
+      description: "Age",
+    },
+    tags: {
+      type: "array",        // For arrays
+      items: { type: "string" },
+      description: "List of tags",
+    },
+  },
+  required: ["name"],       // Required arguments
+}
+```
+
+**Tools for creating JSON Schema:**
+
+| Tool | URL | Description |
+|------|-----|-------------|
+| Transform.tools | https://transform.tools/json-to-json-schema | Auto-generate schema from JSON samples |
+| Liquid Technologies | https://www.liquid-technologies.com/online-json-to-schema-converter | Generate schema from JSON (with options) |
+| JSON Schema Validator | https://www.jsonschemavalidator.net/ | Validate your schema (supports multiple draft versions) |
+
+> **Tip:** Prepare a sample JSON of your data, then use the tools above to generate the schema automatically.
 
 ### Why is this file important?
 

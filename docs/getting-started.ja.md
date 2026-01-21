@@ -323,9 +323,68 @@ src/
 
 **影響:**
 - LLMがこのツールをいつ使うか判断する材料になる
-- `parameters`で定義した項目が、execute関数の`args`に渡される
+- `parameters`で定義した項目を見て、**LLMが適切な値を判断し、argsデータを作成**する
+- そのargsがexecute関数に渡される
 
 **依存:** なし（最初に作成するファイル）
+
+### LLMがargsを作成する流れ
+
+```
+ユーザー: 「田中さんへの挨拶カードを作って」
+                    ↓
+LLM: definition.ts を読む
+     1. description を見て「このツールが適切」と判断
+     2. parameters を見て「name と message が必要」と理解
+     3. ユーザーの発言から値を抽出して args を作成
+                    ↓
+LLMが作成した args: { name: "田中", message: undefined }
+                    ↓
+execute(context, args) が呼ばれる
+```
+
+つまり、**definition.tsはLLMへの説明書**です。LLMはこれを読んで：
+1. いつこのツールを使うべきか判断する（description）
+2. どんなデータを渡すべきか理解する（parameters）
+3. ユーザーの発言から適切な値を抽出してargsを組み立てる
+
+### JSON Schemaについて
+
+`parameters`は**JSON Schema**という標準フォーマットで記述します。JSON Schemaは「データの構造を定義するための仕様」で、OpenAIのFunction Callingでも採用されています。
+
+**基本的な書き方：**
+
+```typescript
+parameters: {
+  type: "object",           // 常に "object"
+  properties: {             // プロパティ（引数）の定義
+    name: {
+      type: "string",       // 型: "string", "number", "boolean", "array", "object"
+      description: "説明",  // LLMがこれを見て値を決める
+    },
+    age: {
+      type: "number",
+      description: "年齢",
+    },
+    tags: {
+      type: "array",        // 配列の場合
+      items: { type: "string" },
+      description: "タグのリスト",
+    },
+  },
+  required: ["name"],       // 必須の引数
+}
+```
+
+**JSON Schemaを作成するツール：**
+
+| ツール | URL | 説明 |
+|--------|-----|------|
+| Transform.tools | https://transform.tools/json-to-json-schema | JSONサンプルからスキーマを自動生成 |
+| Liquid Technologies | https://www.liquid-technologies.com/online-json-to-schema-converter | JSONからスキーマを生成（オプション設定あり） |
+| JSON Schema Validator | https://www.jsonschemavalidator.net/ | スキーマの検証（複数のドラフトバージョン対応） |
+
+> **ヒント:** 実際のデータ例（JSON）を用意して、上記ツールでスキーマを生成すると簡単です。
 
 ### なぜこのファイルが重要？
 
