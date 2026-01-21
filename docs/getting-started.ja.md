@@ -988,6 +988,8 @@ ESLintがコードの問題点を指摘します。表示されたエラーや�
 3. **スタイルを整える**: Tailwind CSSで美しいデザイン
 4. **公開**: [npm公開ガイド](./npm-publishing-guide.md)に従う
 
+詳細は[高度な機能ガイド](./advanced-features.ja.md)を参照してください。
+
 ## MulmoChatとの統合
 
 プラグイン開発後、MulmoChatで使用するには：

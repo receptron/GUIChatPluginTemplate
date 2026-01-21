@@ -990,6 +990,8 @@ ESLint will point out code problems. Fix any errors or warnings shown.
 3. **Style It**: Use Tailwind CSS for beautiful designs
 4. **Publish**: Follow [npm Publishing Guide](./npm-publishing-guide.md)
 
+See [Advanced Features Guide](./advanced-features.md) for details on these topics.
+
 ## Integration with MulmoChat
 
 After developing your plugin, to use it in MulmoChat:

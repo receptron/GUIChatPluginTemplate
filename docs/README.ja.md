@@ -15,6 +15,7 @@
 | ドキュメント | 説明 | 対象 |
 |-------------|------|------|
 | [はじめに](./getting-started.ja.md) | 初めてのプラグインを作るチュートリアル | 初心者 |
+| [高度な機能ガイド](./advanced-features.ja.md) | sendTextMessage、viewState、Tailwind CSS | 中級者 |
 | [プラグイン開発ガイド](./plugin-development-guide.md) | 開発リファレンス（詳細） | 全開発者 |
 | [AI開発ガイド](./ai-development-guide.md) | AI向けに最適化された手順書 | AI + 開発者 |
 | [npm公開ガイド](./npm-publishing-guide.md) | npmへの公開とMulmoChatでの使用 | 全開発者 |
@@ -29,11 +30,11 @@ git clone https://github.com/receptron/GUIChatPluginTemplate.git GUIChatPluginMy
 cd GUIChatPluginMyPlugin
 
 # 依存関係をインストール
-npm install
+yarn install
 
 # デモを実行
-npm run dev        # Vueデモ
-npm run dev:react  # Reactデモ
+yarn dev        # Vueデモ
+yarn dev:react  # Reactデモ
 ```
 
 ### 2. デモを試す
