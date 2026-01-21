@@ -149,19 +149,52 @@ Mock Mode:      ユーザー入力 → キーワード判定 → 即座に → �
 2. 含まれていれば、`putQuestions`ツールを呼び出すモックレスポンスを返す
 3. プラグインが実行され、Viewに表示される
 
-### デフォルトのキーワード
+### テンプレートに最初から設定されているキーワード
 
-`demo/shared/chat-utils.ts`に定義されています：
+Mock Modeでは、入力メッセージに特定のキーワードが含まれているかをチェックして、対応するレスポンスを返します。
 
-| キーワード | 動作 |
-|-----------|------|
-| `quiz`, `question` | Quizプラグインのツールを呼び出す |
-| `hello`, `hi` | テキストで挨拶を返す |
-| その他 | デフォルトのテキスト応答 |
+テンプレートには、Quizプラグイン用のキーワードが最初から設定されています（`demo/shared/chat-utils.ts`）：
+
+| 入力に含まれる単語 | Mock Modeの動作 |
+|-------------------|----------------|
+| `quiz` または `question` | Quizプラグインのツールを呼び出す |
+| `hello` または `hi` | テキストで挨拶を返す |
+| 上記以外 | 汎用的なテキスト応答を返す |
+
+**例：**
+- 「quizを作って」と入力 → `quiz`を検出 → Quizプラグインが動作
+- 「hello」と入力 → `hello`を検出 → 「Hello! How can I help you?」と返答
+- 「天気を教えて」と入力 → 該当なし → 汎用応答
 
 ### 自分のプラグイン用にMockを追加する
 
 **これが重要！** 新しいプラグインを作ったら、Mock Modeでテストするためにモックレスポンスを追加します。
+
+### モックレスポンスとは何を設定するのか？
+
+モックレスポンスは**「LLMがツールを呼び出すときに渡す引数」を模倣するデータ**です。
+
+つまり、`definition.ts`で定義したパラメータに基づいて、LLMが生成するはずの引数を自分で設定します。
+
+```
+あなたが definition.ts で定義:           LLMが理解する内容:
+parameters: {                           「このツールには name と message を渡せばいい」
+  name: { type: "string" },      →
+  message: { type: "string" }
+}
+
+本番環境（Real API Mode）:               Mock Mode:
+ユーザー: 「田中さんへの挨拶」            ユーザー: 「挨拶を作って」
+    ↓                                        ↓
+LLMが判断して引数を生成:                  あなたが設定した引数を使う:
+{ name: "田中", message: "..." }         { name: "田中", message: "..." }
+    ↓                                        ↓
+execute() が呼ばれる                     execute() が呼ばれる（同じ）
+```
+
+**つまり、モックレスポンスの`args`は、definition.tsの`parameters`に対応した値を設定します。**
+
+### 設定方法
 
 `demo/shared/chat-utils.ts`を編集：
 
@@ -180,8 +213,10 @@ export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
     toolCall: {
       name: "greetingCard",  // TOOL_NAMEと一致させる
       args: {
-        name: "田中",
-        message: "こんにちは！",
+        // ⚠️ definition.ts の parameters で定義した項目を設定
+        // LLMが生成するであろう値を自分で書く
+        name: "田中",         // parameters.name に対応
+        message: "こんにちは！", // parameters.message に対応
       },
     },
   },
@@ -189,6 +224,29 @@ export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
   // ...
 };
 ```
+
+### definition.ts との対応関係
+
+```typescript
+// definition.ts で定義したパラメータ:
+parameters: {
+  properties: {
+    name: { type: "string", description: "挨拶する相手の名前" },
+    message: { type: "string", description: "カスタムメッセージ" },
+  },
+  required: ["name"],
+}
+
+// ↓ 対応するモックレスポンスの args:
+args: {
+  name: "田中",         // ← definition.ts の name に対応
+  message: "こんにちは！", // ← definition.ts の message に対応
+}
+```
+
+> **なぜこうするの？**
+> Mock Modeでは、LLMの代わりにあなたが「このツールにはこの引数を渡す」と決めます。
+> これにより、LLM（API）を使わなくても、プラグインの動作をテストできます。
 
 次に、`findMockResponse`関数にキーワード判定を追加：
 
@@ -516,16 +574,35 @@ return {
 
 ### サンプルとは？
 
+> **重要:** samples.tsは**このデモ環境でのみ使用**されます。
+> MulmoChatなどの本番アプリでは使用されません。
+
+サンプルは「LLMがツールを呼び出すときに渡す引数」をエミュレートするデータです。
+
+```
+本番環境（MulmoChat）:
+  ユーザー: 「田中さんへの挨拶を作って」
+      ↓
+  LLM: greetingCardツールを呼び出す
+      ↓
+  execute({ name: "田中" })  ← LLMが引数を決める
+
+デモ環境（このテンプレート）:
+  Quick Samplesボタンをクリック
+      ↓
+  execute({ name: "田中" })  ← samples.tsの引数を使う
+```
+
+つまり、**LLMなしでプラグインの動作をテストできる**仕組みです。
+
 ```
 デモ画面の Quick Samples:
 ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
 │ シンプルな挨拶  │ │カスタムメッセージ│ │ ようこそカード  │
 └─────────────────┘ └─────────────────┘ └─────────────────┘
         ↓ クリック
-execute({ name: "田中" }) が呼ばれる
+execute({ name: "田中" }) が呼ばれる（LLMを経由せずに直接実行）
 ```
-
-チャットを使わずにプラグインをテストできる便利な機能です。
 
 `src/core/samples.ts` を編集：
 
@@ -835,6 +912,15 @@ yarn typecheck
 ```
 
 型とコンポーネントpropsの間の不一致を修正する。
+
+### Lintエラー
+
+コードスタイルの問題を確認：
+```bash
+yarn lint
+```
+
+ESLintがコードの問題点を指摘します。表示されたエラーや警告を修正してください。
 
 ## 次のステップ
 

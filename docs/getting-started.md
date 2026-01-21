@@ -149,19 +149,52 @@ Example: User types "create a quiz"
 2. If yes, return a mock response that calls the `putQuestions` tool
 3. Plugin executes and displays in View
 
-### Default Keywords
+### Keywords Pre-configured in the Template
 
-Defined in `demo/shared/chat-utils.ts`:
+In Mock Mode, the system checks if your input message contains specific keywords and returns the corresponding response.
 
-| Keyword | Behavior |
-|---------|----------|
-| `quiz`, `question` | Calls the Quiz plugin's tool |
-| `hello`, `hi` | Returns a text greeting |
-| Others | Returns default text response |
+The template comes with keywords pre-configured for the Quiz plugin (`demo/shared/chat-utils.ts`):
+
+| Words in your input | Mock Mode behavior |
+|--------------------|-------------------|
+| `quiz` or `question` | Calls the Quiz plugin's tool |
+| `hello` or `hi` | Returns a text greeting |
+| Anything else | Returns a generic text response |
+
+**Examples:**
+- Type "create a quiz" → Detects `quiz` → Quiz plugin runs
+- Type "hello" → Detects `hello` → Returns "Hello! How can I help you?"
+- Type "what's the weather" → No match → Generic response
 
 ### Adding Mock for Your Plugin
 
 **This is important!** When you create a new plugin, add a mock response to test it in Mock Mode.
+
+### What Should the Mock Response Contain?
+
+A mock response is **data that simulates the arguments the LLM would pass when calling your tool**.
+
+In other words, you set up the arguments that the LLM would generate based on the parameters you defined in `definition.ts`.
+
+```
+You define in definition.ts:             LLM understands:
+parameters: {                            "I should pass name and message to this tool"
+  name: { type: "string" },       →
+  message: { type: "string" }
+}
+
+Production (Real API Mode):              Mock Mode:
+User: "Create greeting for Alice"        User: "create a greeting"
+    ↓                                        ↓
+LLM decides and generates args:          Uses args you configured:
+{ name: "Alice", message: "..." }        { name: "Alice", message: "..." }
+    ↓                                        ↓
+execute() is called                      execute() is called (same)
+```
+
+**In short, the mock response's `args` should contain values matching your definition.ts `parameters`.**
+
+### How to Configure
 
 Edit `demo/shared/chat-utils.ts`:
 
@@ -180,8 +213,10 @@ export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
     toolCall: {
       name: "greetingCard",  // Must match TOOL_NAME
       args: {
-        name: "Alice",
-        message: "Hello!",
+        // ⚠️ Set values for items defined in definition.ts parameters
+        // Write what the LLM would generate
+        name: "Alice",       // Corresponds to parameters.name
+        message: "Hello!",   // Corresponds to parameters.message
       },
     },
   },
@@ -189,6 +224,29 @@ export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
   // ...
 };
 ```
+
+### Correspondence with definition.ts
+
+```typescript
+// Parameters defined in definition.ts:
+parameters: {
+  properties: {
+    name: { type: "string", description: "The name of the person to greet" },
+    message: { type: "string", description: "Custom message" },
+  },
+  required: ["name"],
+}
+
+// ↓ Corresponding mock response args:
+args: {
+  name: "Alice",     // ← Corresponds to definition.ts name
+  message: "Hello!", // ← Corresponds to definition.ts message
+}
+```
+
+> **Why do this?**
+> In Mock Mode, YOU decide "pass these arguments to this tool" instead of the LLM.
+> This lets you test your plugin's behavior without using the LLM (API).
 
 Then add keyword matching to `findMockResponse` function:
 
@@ -518,16 +576,35 @@ return {
 
 ### What are Samples?
 
+> **Important:** samples.ts is **only used in this demo environment**.
+> It is NOT used in production apps like MulmoChat.
+
+Samples are data that **emulate the arguments the LLM would pass when calling your tool**.
+
+```
+Production (MulmoChat):
+  User: "Create a greeting for Alice"
+      ↓
+  LLM: Calls greetingCard tool
+      ↓
+  execute({ name: "Alice" })  ← LLM decides the arguments
+
+Demo (this template):
+  Click Quick Samples button
+      ↓
+  execute({ name: "Alice" })  ← Uses arguments from samples.ts
+```
+
+In other words, it's a mechanism to **test your plugin without the LLM**.
+
 ```
 Quick Samples in demo:
 ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
 │ Simple Greeting │ │ Custom Message  │ │ Welcome Card    │
 └─────────────────┘ └─────────────────┘ └─────────────────┘
         ↓ Click
-execute({ name: "Alice" }) is called
+execute({ name: "Alice" }) is called (directly, bypassing LLM)
 ```
-
-A convenient way to test your plugin without using chat.
 
 Edit `src/core/samples.ts`:
 
@@ -837,6 +914,15 @@ yarn typecheck
 ```
 
 Fix any type mismatches between your types and component props.
+
+### Lint errors
+
+Check code style issues:
+```bash
+yarn lint
+```
+
+ESLint will point out code problems. Fix any errors or warnings shown.
 
 ## What's Next?
 
