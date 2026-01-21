@@ -58,17 +58,30 @@ Change the package name:
 
 ### Step 3: Implement your plugin
 
-Edit the files in `src/core/`:
+Edit the files in `src/core/` (shared by Vue/React):
 
 1. **types.ts** - Define your data types
 2. **definition.ts** - Define tool name and JSON schema
 3. **samples.ts** - Add test data
 4. **plugin.ts** - Implement execute function
 
+#### For Vue
+
 Edit the files in `src/vue/`:
 
 1. **View.vue** - Main UI component
 2. **Preview.vue** - Sidebar thumbnail
+
+Start dev server: `yarn dev`
+
+#### For React
+
+Edit the files in `src/react/`:
+
+1. **View.tsx** - Main UI component
+2. **Preview.tsx** - Sidebar thumbnail
+
+Start dev server: `yarn dev:react`
 
 ### Step 4: Update mock responses (optional)
 
@@ -124,15 +137,17 @@ GUIChatPluginTemplate/
 
 ## Understanding the Chat Flow
 
+Normally, the chat communicates with the LLM via OpenAI API. Mock Mode is **for development testing only**, allowing you to test plugin behavior without an API key.
+
 ```
 User Input
     ↓
 useChat.sendMessage()
     ↓
 ┌─────────────────────────────────────┐
-│  Mock Mode?                         │
+│  Mock Mode? (for testing)           │
 │  ├─ Yes → Return mock response      │
-│  └─ No  → Call OpenAI API           │
+│  └─ No  → Call OpenAI API ← normal  │
 └─────────────────────────────────────┘
     ↓
 LLM Response (may include tool_calls)
@@ -142,6 +157,8 @@ LLM Response (may include tool_calls)
 │  ├─ Yes → plugin.execute(args)      │
 │  │        → Update result           │
 │  │        → Show in View component  │
+│  │        → Call API again          │
+│  │        → Get LLM response        │
 │  └─ No  → Show text response        │
 └─────────────────────────────────────┘
 ```

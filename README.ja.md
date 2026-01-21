@@ -20,11 +20,11 @@
 
 ```bash
 # 依存関係をインストール
-npm install
+yarn install
 
 # 開発サーバーを起動
-npm run dev        # Vueデモ
-npm run dev:react  # Reactデモ
+yarn dev        # Vueデモ
+yarn dev:react  # Reactデモ
 ```
 
 http://localhost:5173 を開いてデモを確認。
@@ -59,17 +59,30 @@ cd GUIChatPluginMyPlugin
 
 ### ステップ3: プラグインを実装
 
-`src/core/`のファイルを編集:
+`src/core/`のファイルを編集（Vue/React共通）:
 
 1. **types.ts** - データ型を定義
 2. **definition.ts** - ツール名とJSONスキーマを定義
 3. **samples.ts** - テストデータを追加
 4. **plugin.ts** - execute関数を実装
 
+#### Vueの場合
+
 `src/vue/`のファイルを編集:
 
 1. **View.vue** - メインUIコンポーネント
 2. **Preview.vue** - サイドバーサムネイル
+
+開発サーバー起動: `yarn dev`
+
+#### Reactの場合
+
+`src/react/`のファイルを編集:
+
+1. **View.tsx** - メインUIコンポーネント
+2. **Preview.tsx** - サイドバーサムネイル
+
+開発サーバー起動: `yarn dev:react`
 
 ### ステップ4: モックレスポンスを更新（オプション）
 
@@ -125,15 +138,17 @@ GUIChatPluginTemplate/
 
 ## チャットフローの理解
 
+通常はOpenAI APIを通じてLLMと通信します。Mockモードは**開発時のテスト用**で、APIキー不要でプラグインの動作確認ができます。
+
 ```
 ユーザー入力
     ↓
 useChat.sendMessage()
     ↓
 ┌─────────────────────────────────────┐
-│  Mockモード?                        │
+│  Mockモード?（テスト用）             │
 │  ├─ Yes → モックレスポンスを返す    │
-│  └─ No  → OpenAI APIを呼び出す      │
+│  └─ No  → OpenAI APIを呼び出す ←通常│
 └─────────────────────────────────────┘
     ↓
 LLMレスポンス（tool_callsを含む場合あり）
@@ -203,11 +218,11 @@ const data = computed(() => props.selectedResult?.jsonData);
 ## コマンド
 
 ```bash
-npm run dev          # Vueデモを起動
-npm run dev:react    # Reactデモを起動
-npm run build        # 本番用ビルド
-npm run typecheck    # 型チェック
-npm run lint         # コードのLint
+yarn dev          # Vueデモを起動
+yarn dev:react    # Reactデモを起動
+yarn build        # 本番用ビルド
+yarn typecheck    # 型チェック
+yarn lint         # コードのLint
 ```
 
 ## MulmoChatとの統合
@@ -217,7 +232,7 @@ npm run lint         # コードのLint
 1. npmに公開またはローカルパスを使用
 2. MulmoChatにインストール:
    ```bash
-   npm add @gui-chat-plugin/my-plugin
+   yarn add @gui-chat-plugin/my-plugin
    ```
 3. MulmoChatの`src/tools/index.ts`でインポート:
    ```typescript
