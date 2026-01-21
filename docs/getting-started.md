@@ -404,9 +404,10 @@ Edit `src/core/definition.ts`:
 ```typescript
 import type { ToolDefinition } from "gui-chat-protocol";
 
-// Tool name (used to identify results)
-// ⚠️ Important: This name must be unique. Also used in execute() return value
-export const TOOL_NAME = "greetingCard";
+// Tool name (namespace:toolname format recommended)
+// ⚠️ Important: Use your GitHub account or org name as namespace
+// Examples: "receptron:quiz", "myorg:greeting", "username:timer"
+export const TOOL_NAME = "yournamespace:greetingCard";
 
 // Tool definition for LLM
 export const TOOL_DEFINITION: ToolDefinition = {
@@ -436,7 +437,8 @@ export const SYSTEM_PROMPT = `When the user wants to create a greeting or send a
 ```
 
 **Key Points:**
-- `TOOL_NAME`: Unique identifier for your plugin
+- `TOOL_NAME`: Use `namespace:toolname` format (e.g., `receptron:quiz`)
+- Use your GitHub account or organization name as namespace
 - `description`: Tells LLM when to use this tool
 - `parameters`: What inputs the tool accepts
 

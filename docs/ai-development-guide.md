@@ -180,7 +180,8 @@ export interface {Name}JsonData {
 ```typescript
 import type { ToolDefinition } from "gui-chat-protocol";
 
-export const TOOL_NAME = "{toolName}";
+// Use namespace:toolname format (e.g., "receptron:quiz")
+export const TOOL_NAME = "{namespace}:{toolName}";
 
 export const TOOL_DEFINITION: ToolDefinition = {
   type: "function",

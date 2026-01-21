@@ -404,9 +404,10 @@ LLM: parameters を見て引数を組み立てる
 ```typescript
 import type { ToolDefinition } from "gui-chat-protocol";
 
-// ツール名（結果の識別に使用）
-// ⚠️ 重要: この名前はプロジェクト内で一意。execute()の戻り値でも使う
-export const TOOL_NAME = "greetingCard";
+// ツール名（名前空間:ツール名 の形式を推奨）
+// ⚠️ 重要: 名前空間にはGitHubアカウント名や組織名を使用
+// 例: "receptron:quiz", "myorg:greeting", "username:timer"
+export const TOOL_NAME = "yournamespace:greetingCard";
 
 // LLM向けのツール定義
 export const TOOL_DEFINITION: ToolDefinition = {
@@ -436,7 +437,8 @@ export const SYSTEM_PROMPT = `ユーザーが挨拶を作成したい、また�
 ```
 
 **ポイント：**
-- `TOOL_NAME`: プラグインの一意の識別子
+- `TOOL_NAME`: `名前空間:ツール名`形式を推奨（例: `receptron:quiz`）
+- 名前空間にはGitHubアカウント名や組織名を使用
 - `description`: LLMにこのツールをいつ使うか伝える
 - `parameters`: ツールが受け取る入力を定義
 

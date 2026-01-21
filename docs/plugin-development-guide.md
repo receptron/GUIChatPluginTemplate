@@ -193,7 +193,8 @@ export interface XxxJsonData {
 ```typescript
 import type { ToolDefinition } from "gui-chat-protocol";
 
-export const TOOL_NAME = "xxxTool";
+// Use namespace:toolname format (e.g., "receptron:quiz", "myorg:xxx")
+export const TOOL_NAME = "yournamespace:xxxTool";
 
 export const TOOL_DEFINITION: ToolDefinition = {
   type: "function",
