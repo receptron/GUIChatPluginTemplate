@@ -841,7 +841,7 @@ defineProps<{
 
 ```
 MulmoChatから使う場合:
-import Plugin from "@gui-chat-plugin/greeting/vue";
+import Plugin from "guichat-plugin-greeting/vue";
                                       ↑
                             src/vue/index.ts のエクスポート
 ```
@@ -896,13 +896,13 @@ export default { plugin };
 
 ```json
 {
-  "name": "@gui-chat-plugin/greeting",
+  "name": "guichat-plugin-greeting",
   "description": "GUIChat用のグリーティングカードプラグイン"
 }
 ```
 
 > **命名規則**
-> `@gui-chat-plugin/` で始めると、他のGUIChatプラグインと統一感が出ます。
+> `guichat-plugin-` で始めると、他のGUIChatプラグインと統一感が出ます。
 
 ---
 
@@ -987,6 +987,31 @@ ESLintがコードの問題点を指摘します。表示されたエラーや�
 2. **状態を追加**: `viewState`を使ってUI状態を永続化
 3. **スタイルを整える**: Tailwind CSSで美しいデザイン
 4. **公開**: [npm公開ガイド](./npm-publishing-guide.md)に従う
+
+## MulmoChatとの統合
+
+プラグイン開発後、MulmoChatで使用するには：
+
+1. npmに公開またはローカルパスを使用
+2. MulmoChatにインストール:
+   ```bash
+   yarn add guichat-plugin-greeting
+   ```
+3. MulmoChatの`src/tools/index.ts`でインポート:
+   ```typescript
+   import GreetingPlugin from "guichat-plugin-greeting/vue";
+
+   export const plugins = [
+     // ... 他のプラグイン
+     GreetingPlugin,
+   ];
+   ```
+4. MulmoChatの`src/main.ts`でCSSをインポート:
+   ```typescript
+   import "guichat-plugin-greeting/style.css";
+   ```
+
+詳細は[npm公開ガイド](./npm-publishing-guide.md)を参照してください。
 
 ## まとめ
 

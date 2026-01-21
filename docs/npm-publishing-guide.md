@@ -14,7 +14,7 @@ This guide covers how to publish your GUIChat plugin to npm and use it in MulmoC
 
 ```json
 {
-  "name": "@gui-chat-plugin/your-plugin-name",
+  "name": "guichat-plugin-your-plugin-name",
   "version": "0.1.0",
   "description": "Your plugin description",
   "type": "module",
@@ -66,14 +66,14 @@ This guide covers how to publish your GUIChat plugin to npm and use it in MulmoC
 Create a `README.md` at the project root:
 
 ```markdown
-# @gui-chat-plugin/your-plugin-name
+# guichat-plugin-your-plugin-name
 
 Description of your plugin.
 
 ## Installation
 
 \`\`\`bash
-npm install @gui-chat-plugin/your-plugin-name
+npm install guichat-plugin-your-plugin-name
 \`\`\`
 
 ## Usage
@@ -81,21 +81,21 @@ npm install @gui-chat-plugin/your-plugin-name
 ### Vue
 
 \`\`\`typescript
-import { plugin } from "@gui-chat-plugin/your-plugin-name/vue";
-import "@gui-chat-plugin/your-plugin-name/style.css";
+import { plugin } from "guichat-plugin-your-plugin-name/vue";
+import "guichat-plugin-your-plugin-name/style.css";
 \`\`\`
 
 ### React
 
 \`\`\`typescript
-import { plugin } from "@gui-chat-plugin/your-plugin-name/react";
-import "@gui-chat-plugin/your-plugin-name/style.css";
+import { plugin } from "guichat-plugin-your-plugin-name/react";
+import "guichat-plugin-your-plugin-name/style.css";
 \`\`\`
 
 ### Core (Framework-agnostic)
 
 \`\`\`typescript
-import { pluginCore, executeYourPlugin } from "@gui-chat-plugin/your-plugin-name/core";
+import { pluginCore, executeYourPlugin } from "guichat-plugin-your-plugin-name/core";
 \`\`\`
 
 ## Test Prompts
@@ -134,12 +134,10 @@ Check that `dist/` contains:
 npm login
 ```
 
-### Publish (Scoped Package)
-
-For scoped packages like `@gui-chat-plugin/xxx`:
+### Publish
 
 ```bash
-npm publish --access public
+npm publish
 ```
 
 ### Version Updates
@@ -157,7 +155,7 @@ npm version minor
 npm version major
 
 # Then publish
-npm publish --access public
+npm publish
 ```
 
 ## Step 3: Use in MulmoChat
@@ -167,7 +165,7 @@ npm publish --access public
 In MulmoChat directory:
 
 ```bash
-npm install @gui-chat-plugin/your-plugin-name
+npm install guichat-plugin-your-plugin-name
 ```
 
 Or for local development:
@@ -176,7 +174,7 @@ Or for local development:
 # In package.json
 {
   "dependencies": {
-    "@gui-chat-plugin/your-plugin-name": "file:../GUIChatPluginYourName"
+    "guichat-plugin-your-plugin-name": "file:../GUIChatPluginYourName"
   }
 }
 ```
@@ -187,7 +185,7 @@ Edit `src/tools/index.ts`:
 
 ```typescript
 // Import your plugin
-import { plugin as yourPlugin } from "@gui-chat-plugin/your-plugin-name/vue";
+import { plugin as yourPlugin } from "guichat-plugin-your-plugin-name/vue";
 
 // Add to plugins array
 export const plugins = [
@@ -202,7 +200,7 @@ Edit `src/main.ts`:
 
 ```typescript
 // Import plugin styles
-import "@gui-chat-plugin/your-plugin-name/style.css";
+import "guichat-plugin-your-plugin-name/style.css";
 ```
 
 ### Verify Integration
@@ -265,7 +263,7 @@ For developing your plugin alongside MulmoChat:
 npm link
 
 # In MulmoChat directory
-npm link @gui-chat-plugin/your-plugin-name
+npm link guichat-plugin-your-plugin-name
 ```
 
 ### Option 2: File reference
@@ -275,7 +273,7 @@ In MulmoChat's `package.json`:
 ```json
 {
   "dependencies": {
-    "@gui-chat-plugin/your-plugin-name": "file:../GUIChatPluginYourName"
+    "guichat-plugin-your-plugin-name": "file:../GUIChatPluginYourName"
   }
 }
 ```
@@ -311,20 +309,13 @@ Example:
 - Add new sample → MINOR
 - Fix typo in message → PATCH
 
-## npm Organization
+## Package Naming Convention
 
-To publish under `@gui-chat-plugin` organization, you need:
-
-1. Membership in the organization
-2. Permission to publish packages
-
-Contact the organization admin if you need access.
-
-Alternatively, use your own scope:
+Use the `guichat-plugin-` prefix for consistency with other GUIChat plugins:
 
 ```json
 {
-  "name": "@your-username/guichat-plugin-name"
+  "name": "guichat-plugin-your-plugin-name"
 }
 ```
 

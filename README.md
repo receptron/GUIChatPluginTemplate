@@ -51,7 +51,7 @@ cd GUIChatPluginMyPlugin
 Change the package name:
 ```json
 {
-  "name": "@gui-chat-plugin/my-plugin",
+  "name": "guichat-plugin-my-plugin",
   "description": "Your plugin description"
 }
 ```
@@ -236,11 +236,11 @@ After developing your plugin:
 1. Publish to npm or use local path
 2. Install in MulmoChat:
    ```bash
-   yarn add @gui-chat-plugin/my-plugin
+   yarn add guichat-plugin-my-plugin
    ```
 3. Import in MulmoChat's `src/tools/index.ts`:
    ```typescript
-   import MyPlugin from "@gui-chat-plugin/my-plugin/vue";
+   import MyPlugin from "guichat-plugin-my-plugin/vue";
    ```
 
 ## License

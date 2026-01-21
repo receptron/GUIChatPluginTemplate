@@ -70,21 +70,21 @@ src/
 
 ```typescript
 // Default (Core - framework-agnostic)
-import { pluginCore, TOOL_NAME, QuizData } from "@gui-chat-plugin/sample";
+import { pluginCore, TOOL_NAME, QuizData } from "guichat-plugin-sample";
 
 // Vue implementation (for apps with UI)
-import QuizPlugin from "@gui-chat-plugin/sample/vue";
-import "@gui-chat-plugin/sample/style.css";
+import QuizPlugin from "guichat-plugin-sample/vue";
+import "guichat-plugin-sample/style.css";
 
 // Named Vue exports
-import { plugin, View, Preview } from "@gui-chat-plugin/sample/vue";
+import { plugin, View, Preview } from "guichat-plugin-sample/vue";
 
 // React implementation (for React apps)
-import QuizPlugin from "@gui-chat-plugin/sample/react";
-import "@gui-chat-plugin/sample/style.css";
+import QuizPlugin from "guichat-plugin-sample/react";
+import "guichat-plugin-sample/style.css";
 
 // Named React exports
-import { plugin, View, Preview } from "@gui-chat-plugin/sample/react";
+import { plugin, View, Preview } from "guichat-plugin-sample/react";
 ```
 
 ---
@@ -528,21 +528,21 @@ src/
 
 ```typescript
 // デフォルト（Core - フレームワーク非依存）
-import { pluginCore, TOOL_NAME, QuizData } from "@gui-chat-plugin/sample";
+import { pluginCore, TOOL_NAME, QuizData } from "guichat-plugin-sample";
 
 // Vue実装（UIを持つアプリ用）
-import QuizPlugin from "@gui-chat-plugin/sample/vue";
-import "@gui-chat-plugin/sample/style.css";
+import QuizPlugin from "guichat-plugin-sample/vue";
+import "guichat-plugin-sample/style.css";
 
 // Vue名前付きエクスポート
-import { plugin, View, Preview } from "@gui-chat-plugin/sample/vue";
+import { plugin, View, Preview } from "guichat-plugin-sample/vue";
 
 // React実装（Reactアプリ用）
-import QuizPlugin from "@gui-chat-plugin/sample/react";
-import "@gui-chat-plugin/sample/style.css";
+import QuizPlugin from "guichat-plugin-sample/react";
+import "guichat-plugin-sample/style.css";
 
 // React名前付きエクスポート
-import { plugin, View, Preview } from "@gui-chat-plugin/sample/react";
+import { plugin, View, Preview } from "guichat-plugin-sample/react";
 ```
 
 ---

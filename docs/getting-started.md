@@ -843,7 +843,7 @@ defineProps<{
 
 ```
 When used from MulmoChat:
-import Plugin from "@gui-chat-plugin/greeting/vue";
+import Plugin from "guichat-plugin-greeting/vue";
                                       ↑
                             Exports from src/vue/index.ts
 ```
@@ -898,13 +898,13 @@ Edit `package.json`:
 
 ```json
 {
-  "name": "@gui-chat-plugin/greeting",
+  "name": "guichat-plugin-greeting",
   "description": "A greeting card plugin for GUIChat"
 }
 ```
 
 > **Naming convention**
-> Starting with `@gui-chat-plugin/` gives consistency with other GUIChat plugins.
+> Starting with `guichat-plugin-` gives consistency with other GUIChat plugins.
 
 ---
 
@@ -989,6 +989,31 @@ ESLint will point out code problems. Fix any errors or warnings shown.
 2. **Add State**: Use `viewState` to persist UI state
 3. **Style It**: Use Tailwind CSS for beautiful designs
 4. **Publish**: Follow [npm Publishing Guide](./npm-publishing-guide.md)
+
+## Integration with MulmoChat
+
+After developing your plugin, to use it in MulmoChat:
+
+1. Publish to npm or use local path
+2. Install in MulmoChat:
+   ```bash
+   yarn add guichat-plugin-greeting
+   ```
+3. Import in MulmoChat's `src/tools/index.ts`:
+   ```typescript
+   import GreetingPlugin from "guichat-plugin-greeting/vue";
+
+   export const plugins = [
+     // ... other plugins
+     GreetingPlugin,
+   ];
+   ```
+4. Import CSS in MulmoChat's `src/main.ts`:
+   ```typescript
+   import "guichat-plugin-greeting/style.css";
+   ```
+
+See [npm Publishing Guide](./npm-publishing-guide.md) for details.
 
 ## Summary
 

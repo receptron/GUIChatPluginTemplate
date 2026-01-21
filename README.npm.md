@@ -1,6 +1,6 @@
-# @gui-chat-plugin/{plugin-name}
+# guichat-plugin-{plugin-name}
 
-[![npm version](https://badge.fury.io/js/%40gui-chat-plugin%2F{plugin-name}.svg)](https://www.npmjs.com/package/@gui-chat-plugin/{plugin-name})
+[![npm version](https://badge.fury.io/js/guichat-plugin-{plugin-name}.svg)](https://www.npmjs.com/package/guichat-plugin-{plugin-name})
 
 A plugin for [MulmoChat](https://github.com/receptron/MulmoChat) - a multi-modal voice chat application with OpenAI's GPT-4 Realtime API.
 
@@ -11,7 +11,7 @@ A plugin for [MulmoChat](https://github.com/receptron/MulmoChat) - a multi-modal
 ## Installation
 
 ```bash
-yarn add @gui-chat-plugin/{plugin-name}
+yarn add guichat-plugin-{plugin-name}
 ```
 
 ## Usage
@@ -20,7 +20,7 @@ yarn add @gui-chat-plugin/{plugin-name}
 
 ```typescript
 // In src/tools/index.ts
-import Plugin from "@gui-chat-plugin/{plugin-name}/vue";
+import Plugin from "guichat-plugin-{plugin-name}/vue";
 
 const pluginList = [
   // ... other plugins
@@ -28,35 +28,35 @@ const pluginList = [
 ];
 
 // In src/main.ts
-import "@gui-chat-plugin/{plugin-name}/style.css";
+import "guichat-plugin-{plugin-name}/style.css";
 ```
 
 ### React Implementation
 
 ```typescript
-import Plugin from "@gui-chat-plugin/{plugin-name}/react";
-import "@gui-chat-plugin/{plugin-name}/style.css";
+import Plugin from "guichat-plugin-{plugin-name}/react";
+import "guichat-plugin-{plugin-name}/style.css";
 
 // Named exports
-import { plugin, View, Preview } from "@gui-chat-plugin/{plugin-name}/react";
+import { plugin, View, Preview } from "guichat-plugin-{plugin-name}/react";
 ```
 
 ### Core Only (Framework-agnostic)
 
 ```typescript
-import { pluginCore, TOOL_NAME } from "@gui-chat-plugin/{plugin-name}";
+import { pluginCore, TOOL_NAME } from "guichat-plugin-{plugin-name}";
 // or
-import pluginCore from "@gui-chat-plugin/{plugin-name}";
+import pluginCore from "guichat-plugin-{plugin-name}";
 ```
 
 ## Package Exports
 
 | Export | Description |
 |--------|-------------|
-| `@gui-chat-plugin/{plugin-name}` | Core (framework-agnostic) |
-| `@gui-chat-plugin/{plugin-name}/vue` | Vue implementation with UI components |
-| `@gui-chat-plugin/{plugin-name}/react` | React implementation with UI components |
-| `@gui-chat-plugin/{plugin-name}/style.css` | Tailwind CSS styles |
+| `guichat-plugin-{plugin-name}` | Core (framework-agnostic) |
+| `guichat-plugin-{plugin-name}/vue` | Vue implementation with UI components |
+| `guichat-plugin-{plugin-name}/react` | React implementation with UI components |
+| `guichat-plugin-{plugin-name}/style.css` | Tailwind CSS styles |
 
 ## Development
 

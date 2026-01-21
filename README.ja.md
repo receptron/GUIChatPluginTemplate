@@ -52,7 +52,7 @@ cd GUIChatPluginMyPlugin
 パッケージ名を変更:
 ```json
 {
-  "name": "@gui-chat-plugin/my-plugin",
+  "name": "guichat-plugin-my-plugin",
   "description": "プラグインの説明"
 }
 ```
@@ -237,11 +237,11 @@ yarn lint         # コードのLint
 1. npmに公開またはローカルパスを使用
 2. MulmoChatにインストール:
    ```bash
-   yarn add @gui-chat-plugin/my-plugin
+   yarn add guichat-plugin-my-plugin
    ```
 3. MulmoChatの`src/tools/index.ts`でインポート:
    ```typescript
-   import MyPlugin from "@gui-chat-plugin/my-plugin/vue";
+   import MyPlugin from "guichat-plugin-my-plugin/vue";
    ```
 
 ## ドキュメント

@@ -40,7 +40,7 @@ Use this prompt template with specifications:
 ```
 Create a GUIChat plugin based on GUIChatPluginTemplate.
 
-Plugin name: @gui-chat-plugin/{name}
+Plugin name: guichat-plugin-{name}
 Function: {detailed description}
 
 Tool Definition:
@@ -497,7 +497,7 @@ npm run dev:react   # Test React demo
 ```
 Read docs/ai-development-guide.md in GUIChatPluginTemplate and create a new plugin:
 
-Plugin: @gui-chat-plugin/countdown
+Plugin: guichat-plugin-countdown
 Function: Display a countdown timer with customizable duration and message
 
 Tool Definition:
