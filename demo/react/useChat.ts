@@ -114,7 +114,7 @@ export function useChat(options: UseChatOptions) {
       setIsLoading(true);
 
       const userMessage: ChatMessage = { role: "user", content };
-      const currentMessages = [...messages, userMessage];
+      let currentMessages = [...messages, userMessage];
       setMessages(currentMessages);
 
       try {
@@ -126,46 +126,78 @@ export function useChat(options: UseChatOptions) {
 
         const client = createOpenAIClient(apiKey);
         const systemPrompt = buildSystemPrompt(options.systemPrompt, plugin.systemPrompt);
-        const apiMessages = convertToApiMessages(currentMessages, systemPrompt);
         const tools = buildToolsParam(toolDefinition);
 
-        const response = await callOpenAI(client, model, apiMessages, tools);
-        const choice = response.choices[0];
-        const message = choice.message;
-        let newMessages = [...currentMessages];
+        // Initial API call
+        let apiMessages = convertToApiMessages(currentMessages, systemPrompt);
+        let response = await callOpenAI(client, model, apiMessages, tools);
+        let choice = response.choices[0];
+        let message = choice.message;
 
-        if (message.tool_calls && message.tool_calls.length > 0) {
+        // Process tool calls if any
+        while (message.tool_calls && message.tool_calls.length > 0) {
           const toolCalls = message.tool_calls.map((tc) => ({
             id: tc.id,
             name: tc.function.name,
             arguments: tc.function.arguments,
           }));
 
-          newMessages.push({
-            role: "assistant",
-            content: message.content || "",
-            toolCalls,
-          });
+          currentMessages = [
+            ...currentMessages,
+            {
+              role: "assistant" as const,
+              content: message.content || "",
+              toolCalls,
+            },
+          ];
+
+          // Execute all tool calls and collect instructions
+          let lastInstructions: string | undefined;
 
           for (const toolCall of toolCalls) {
             const args = JSON.parse(toolCall.arguments);
             const toolResult = await executePlugin(args);
             setResult(toolResult);
 
-            newMessages.push({
-              role: "tool",
-              content: JSON.stringify(toolResult.jsonData || toolResult.message),
-              toolCallId: toolCall.id,
-            });
+            // Store instructions from the last tool result
+            if (toolResult.instructions) {
+              lastInstructions = toolResult.instructions;
+            }
+
+            currentMessages = [
+              ...currentMessages,
+              {
+                role: "tool" as const,
+                content: JSON.stringify(toolResult.jsonData || toolResult.message),
+                toolCallId: toolCall.id,
+              },
+            ];
           }
 
-          setMessages(newMessages);
-        } else {
-          newMessages.push({
-            role: "assistant",
-            content: message.content || "",
-          });
-          setMessages(newMessages);
+          setMessages([...currentMessages]);
+
+          // Call API again to get LLM's response to tool results
+          // Include instructions in the system prompt if available
+          const instructionPrompt = lastInstructions
+            ? `${systemPrompt}\n\n[Instructions for next response]: ${lastInstructions}`
+            : systemPrompt;
+
+          apiMessages = convertToApiMessages(currentMessages, instructionPrompt);
+          response = await callOpenAI(client, model, apiMessages, tools);
+          choice = response.choices[0];
+          message = choice.message;
+        }
+
+        // Add final assistant response
+        if (message.content) {
+          currentMessages = [
+            ...currentMessages,
+            {
+              role: "assistant" as const,
+              content: message.content,
+            },
+          ];
+          setMessages(currentMessages);
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unknown error occurred");
