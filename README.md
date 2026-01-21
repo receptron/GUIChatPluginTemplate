@@ -102,38 +102,43 @@ export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
 
 ## Plugin Structure
 
+✏️ = Edit this file　　🚫 = Don't edit (use as-is)
+
 ```
 GUIChatPluginTemplate/
-├── src/
-│   ├── index.ts          # Default export (core)
-│   ├── style.css         # Tailwind CSS entry
+│
+├── src/                  # 📦 Distributed as npm package
+│   │                     #    Used by apps like MulmoChat
+│   ├── index.ts          # 🚫 Default export (core)
+│   ├── style.css         # 🚫 Tailwind CSS entry
 │   ├── core/             # Framework-agnostic (no Vue/React dependencies)
-│   │   ├── index.ts      # Core exports
-│   │   ├── types.ts      # Plugin-specific types
-│   │   ├── definition.ts # Tool definition (schema for LLM)
-│   │   ├── samples.ts    # Sample data for testing
-│   │   └── plugin.ts     # Execute function
+│   │   ├── index.ts      # 🚫 Core exports
+│   │   ├── types.ts      # ✏️ Plugin-specific types
+│   │   ├── definition.ts # ✏️ Tool definition (schema for LLM)
+│   │   ├── samples.ts    # ✏️ Sample data for testing
+│   │   └── plugin.ts     # ✏️ Execute function
 │   ├── vue/              # Vue-specific implementation
-│   │   ├── index.ts      # Vue plugin (combines core + components)
-│   │   ├── View.vue      # Main view component
-│   │   └── Preview.vue   # Sidebar preview component
+│   │   ├── index.ts      # 🚫 Vue plugin (combines core + components)
+│   │   ├── View.vue      # ✏️ Main view component
+│   │   └── Preview.vue   # ✏️ Sidebar preview component
 │   └── react/            # React-specific implementation
-│       ├── index.ts      # React plugin (combines core + components)
-│       ├── View.tsx      # Main view component
-│       └── Preview.tsx   # Sidebar preview component
-└── demo/                 # Demo applications with chat
+│       ├── index.ts      # 🚫 React plugin (combines core + components)
+│       ├── View.tsx      # ✏️ Main view component
+│       └── Preview.tsx   # ✏️ Sidebar preview component
+│
+└── demo/                 # 🔧 For development/testing only (NOT distributed)
+    │                     #    Chat demo to test your plugin
+    │                     #    🚫 Generally no edits needed
     ├── vue/              # Vue demo
-    │   ├── App.vue       # Demo app with chat UI
-    │   ├── useChat.ts    # Chat composable
-    │   └── main.ts       # Entry point
     ├── react/            # React demo
-    │   ├── App.tsx       # Demo app with chat UI
-    │   ├── useChat.ts    # Chat hook
-    │   └── main.tsx      # Entry point
-    └── shared/           # Shared utilities
-        ├── chat-types.ts # Chat message types
-        └── chat-utils.ts # OpenAI integration
+    └── shared/
+        └── chat-utils.ts # ✏️ Edit only to add mock responses
 ```
+
+> **For Beginners**:
+> - `src/` = Your plugin code. After npm publish, other apps import and use this
+> - `demo/` = Development environment to test your plugin. Not included in npm package
+> - Just edit the ✏️ files to create your plugin
 
 ## Understanding the Chat Flow
 

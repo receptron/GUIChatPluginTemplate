@@ -103,38 +103,43 @@ export const DEFAULT_MOCK_RESPONSES: Record<string, MockResponse> = {
 
 ## プラグイン構造
 
+✏️ = 編集するファイル　　🚫 = 編集しない（そのまま使う）
+
 ```
 GUIChatPluginTemplate/
-├── src/
-│   ├── index.ts          # デフォルトエクスポート（core）
-│   ├── style.css         # Tailwind CSSエントリー
+│
+├── src/                  # 📦 npmパッケージとして配布される部分
+│   │                     #    MulmoChatなどのアプリから使用される
+│   ├── index.ts          # 🚫 デフォルトエクスポート（core）
+│   ├── style.css         # 🚫 Tailwind CSSエントリー
 │   ├── core/             # フレームワーク非依存（Vue/React依存なし）
-│   │   ├── index.ts      # Coreエクスポート
-│   │   ├── types.ts      # プラグイン固有の型
-│   │   ├── definition.ts # ツール定義（LLM用スキーマ）
-│   │   ├── samples.ts    # テスト用サンプルデータ
-│   │   └── plugin.ts     # Execute関数
+│   │   ├── index.ts      # 🚫 Coreエクスポート
+│   │   ├── types.ts      # ✏️ プラグイン固有の型
+│   │   ├── definition.ts # ✏️ ツール定義（LLM用スキーマ）
+│   │   ├── samples.ts    # ✏️ テスト用サンプルデータ
+│   │   └── plugin.ts     # ✏️ Execute関数
 │   ├── vue/              # Vue固有の実装
-│   │   ├── index.ts      # Vueプラグイン（core + コンポーネント）
-│   │   ├── View.vue      # メインビューコンポーネント
-│   │   └── Preview.vue   # サイドバープレビュー
+│   │   ├── index.ts      # 🚫 Vueプラグイン（core + コンポーネント）
+│   │   ├── View.vue      # ✏️ メインビューコンポーネント
+│   │   └── Preview.vue   # ✏️ サイドバープレビュー
 │   └── react/            # React固有の実装
-│       ├── index.ts      # Reactプラグイン（core + コンポーネント）
-│       ├── View.tsx      # メインビューコンポーネント
-│       └── Preview.tsx   # サイドバープレビュー
-└── demo/                 # チャット統合デモ
+│       ├── index.ts      # 🚫 Reactプラグイン（core + コンポーネント）
+│       ├── View.tsx      # ✏️ メインビューコンポーネント
+│       └── Preview.tsx   # ✏️ サイドバープレビュー
+│
+└── demo/                 # 🔧 開発・テスト用（配布されない）
+    │                     #    プラグイン動作確認のためのチャットデモ
+    │                     #    🚫 基本的に編集不要
     ├── vue/              # Vueデモ
-    │   ├── App.vue       # チャットUI付きデモアプリ
-    │   ├── useChat.ts    # チャットコンポーザブル
-    │   └── main.ts       # エントリーポイント
     ├── react/            # Reactデモ
-    │   ├── App.tsx       # チャットUI付きデモアプリ
-    │   ├── useChat.ts    # チャットフック
-    │   └── main.tsx      # エントリーポイント
-    └── shared/           # 共有ユーティリティ
-        ├── chat-types.ts # チャットメッセージ型
-        └── chat-utils.ts # OpenAI連携
+    └── shared/
+        └── chat-utils.ts # ✏️ モックレスポンス追加時のみ編集
 ```
+
+> **初心者向け解説**:
+> - `src/` = あなたが作るプラグイン本体。npm公開後、他のアプリからインポートして使う
+> - `demo/` = 開発中にプラグインをテストするための環境。npm公開時には含まれない
+> - ✏️ のファイルだけ編集すればプラグインが作れる
 
 ## チャットフローの理解
 
@@ -241,7 +246,7 @@ yarn lint         # コードのLint
 
 ## ドキュメント
 
-詳細なドキュメントは[docs/](./docs/)を参照:
+詳細なドキュメントは[docs/](./docs/README.ja.md)を参照:
 
 - [はじめに](./docs/getting-started.ja.md) - 初心者向けチュートリアル
 - [プラグイン開発ガイド](./docs/plugin-development-guide.md) - 詳細リファレンス
