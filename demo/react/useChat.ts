@@ -228,6 +228,7 @@ export function useChat(options: UseChatOptions) {
   return {
     // State
     messages,
+    setMessages,
     isLoading,
     error,
     result,

@@ -9,6 +9,7 @@ function App() {
   // Chat hook
   const {
     messages,
+    setMessages,
     isLoading,
     error,
     result,
@@ -76,6 +77,37 @@ function App() {
   const executeSample = async (sample: ToolSample) => {
     const toolResult = await executePlugin(sample.args);
     setResult(toolResult);
+
+    // Add messages in correct order for OpenAI API
+    // IMPORTANT: tool_calls must be followed by tool response message
+    const toolCallId = `sample_${Date.now()}`;
+
+    setMessages((prev) => [
+      ...prev,
+      // 1. Assistant message with tool_calls
+      {
+        role: "assistant" as const,
+        content: "",
+        toolCalls: [
+          {
+            id: toolCallId,
+            name: currentPlugin.toolDefinition.name,
+            arguments: JSON.stringify(sample.args),
+          },
+        ],
+      },
+      // 2. Tool response message (required by OpenAI)
+      {
+        role: "tool" as const,
+        content: JSON.stringify(toolResult.jsonData || toolResult.message),
+        toolCallId,
+      },
+      // 3. Final assistant message
+      {
+        role: "assistant" as const,
+        content: `Executed sample: ${sample.name}`,
+      },
+    ]);
   };
 
   return (
