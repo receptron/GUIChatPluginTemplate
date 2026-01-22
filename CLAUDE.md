@@ -68,9 +68,10 @@ Defines information for the LLM to decide when to use this tool.
 ```typescript
 import type { ToolDefinition } from "gui-chat-protocol";
 
-// Tool name (namespace:toolname format recommended)
-// Examples: "receptron:quiz", "myorg:countdown", "username:greeting"
-export const TOOL_NAME = "yournamespace:yourToolName";
+// Tool name (namespace_toolname format recommended)
+// Examples: "receptron_quiz", "myorg_countdown", "username_greeting"
+// NOTE: OpenAI requires ^[a-zA-Z0-9_-]+$ pattern (no colons!)
+export const TOOL_NAME = "yournamespace_yourToolName";
 
 // Tool definition (JSON Schema format)
 export const TOOL_DEFINITION: ToolDefinition = {
@@ -97,7 +98,8 @@ export const TOOL_DEFINITION: ToolDefinition = {
 ```
 
 **Key Points**:
-- `TOOL_NAME` should use `namespace:toolname` format (e.g., `receptron:quiz`)
+- `TOOL_NAME` should use `namespace_toolname` format (e.g., `receptron_quiz`)
+- OpenAI requires tool names to match `^[a-zA-Z0-9_-]+$` (no colons!)
 - Use GitHub account name or organization name as namespace
 - Write `description` that LLM can understand
 - `parameters` follows JSON Schema format
@@ -693,7 +695,7 @@ interface ToolResult<T, J> {
 After creating a plugin, verify the following:
 
 **Core (Required)**:
-- [ ] `TOOL_NAME` is in `namespace:toolname` format (e.g., `receptron:quiz`)
+- [ ] `TOOL_NAME` is in `namespace_toolname` format (e.g., `receptron_quiz`) - no colons!
 - [ ] `parameters` in definition.ts matches `Args` in types.ts
 - [ ] `return` in plugin.ts has `toolName: TOOL_NAME`
 - [ ] `args` in samples.ts matches `Args` type
@@ -729,6 +731,46 @@ After creating a plugin, verify the following:
 ### Mock Mode Not Working
 - Check if Mock and keywords are added to `demo/shared/chat-utils.ts`
 - Check if keywords match correctly
+
+### OpenAI API Error: "tool_calls must be followed by tool messages"
+
+**Error**: `400 An assistant message with 'tool_calls' must be followed by tool messages responding to each 'tool_call_id'`
+
+**Cause**: When adding messages with `toolCalls`, OpenAI requires a corresponding `tool` role message with matching `toolCallId`.
+
+**Fix**: Always add messages in this order:
+
+```typescript
+const toolCallId = `call_${Date.now()}`;
+
+// 1. Assistant message with tool_calls
+messages.push({
+  role: "assistant",
+  content: "",
+  toolCalls: [
+    {
+      id: toolCallId,
+      name: "tool_name",
+      arguments: JSON.stringify(args),
+    },
+  ],
+});
+
+// 2. Tool response message (REQUIRED!)
+messages.push({
+  role: "tool",
+  content: JSON.stringify(result.jsonData || result.message),
+  toolCallId,  // Must match the id above
+});
+
+// 3. Final assistant message (optional)
+messages.push({
+  role: "assistant",
+  content: "Tool executed successfully",
+});
+```
+
+**Important**: Never add a `toolCalls` message without the corresponding `tool` response message.
 
 ---
 

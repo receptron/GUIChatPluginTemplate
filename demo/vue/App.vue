@@ -240,17 +240,34 @@ const executeSample = async (sample: ToolSample) => {
   const toolResult = await executePlugin(sample.args);
   result.value = toolResult;
 
-  // Add to messages for context
+  // Add messages in correct order for OpenAI API
+  // IMPORTANT: tool_calls must be followed by tool response message
+  const toolCallId = `sample_${Date.now()}`;
+
+  // 1. Assistant message with tool_calls
   messages.value.push({
     role: "assistant",
-    content: `Executed sample: ${sample.name}`,
+    content: "",
     toolCalls: [
       {
-        id: `sample_${Date.now()}`,
+        id: toolCallId,
         name: currentPlugin.toolDefinition.name,
         arguments: JSON.stringify(sample.args),
       },
     ],
+  });
+
+  // 2. Tool response message (required by OpenAI)
+  messages.value.push({
+    role: "tool",
+    content: JSON.stringify(toolResult.jsonData || toolResult.message),
+    toolCallId,
+  });
+
+  // 3. Final assistant message
+  messages.value.push({
+    role: "assistant",
+    content: `Executed sample: ${sample.name}`,
   });
 };
 </script>
