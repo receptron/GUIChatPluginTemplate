@@ -1,6 +1,6 @@
 {
   "name": "@gui-chat-plugin/template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GUIChat Plugin Template with Chat Integration Demo",
   "type": "module",
   "main": "./dist/index.cjs",
