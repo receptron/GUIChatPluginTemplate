@@ -86,7 +86,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "gui-chat-protocol": "^0.0.1",
+    "gui-chat-protocol": "^0.0.3",
     "openai": "^4.77.0"
   }
 }
