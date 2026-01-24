@@ -10,8 +10,9 @@ Complete reference for developing GUIChat plugins. This guide covers all aspects
 4. [Core Implementation](#core-implementation)
 5. [UI Components](#ui-components)
 6. [Advanced Patterns](#advanced-patterns)
-7. [Testing](#testing)
-8. [Checklist](#checklist)
+7. [External API Key Integration](#external-api-key-integration)
+8. [Testing](#testing)
+9. [Checklist](#checklist)
 
 ---
 
@@ -576,6 +577,127 @@ export const pluginCore: ToolPluginCore = {
   ],
 };
 ```
+
+---
+
+## External API Key Integration
+
+When your plugin requires an external API key (e.g., Google Maps, weather services), you need to:
+1. Check if the API key is available using `isEnabled`
+2. Receive the API key as a prop in your View component
+
+### Step 1: Update isEnabled in plugin.ts
+
+The `isEnabled` function receives `startResponse` from the host app, which contains available API keys:
+
+```typescript
+import type { ToolPluginCore, ToolContext, ToolResult } from "gui-chat-protocol";
+
+// Define the StartResponse type with your API key
+interface StartResponse {
+  myServiceApiKey?: string;
+  // ... other keys
+}
+
+export const pluginCore: ToolPluginCore<MyData, MyJsonData, MyArgs> = {
+  toolDefinition: TOOL_DEFINITION,
+  execute: executeMyTool,
+  generatingMessage: "Processing...",
+  // Plugin is enabled only when API key is available
+  isEnabled: (startResponse?: StartResponse | null) => !!startResponse?.myServiceApiKey,
+  systemPrompt: SYSTEM_PROMPT,
+  samples: SAMPLES,
+};
+```
+
+### Step 2: Receive API Key in View Component (Vue)
+
+```vue
+<script setup lang="ts">
+import type { ToolResult } from "gui-chat-protocol/vue";
+
+const props = defineProps<{
+  selectedResult: ToolResult<MyData>;
+  myServiceApiKey?: string | null;  // Receive API key as prop
+}>();
+
+// Use the API key
+const apiUrl = computed(() =>
+  `https://api.myservice.com/data?key=${props.myServiceApiKey}`
+);
+</script>
+```
+
+### Step 3: Host App Configuration (MulmoChat Example)
+
+The host app needs to:
+
+**1. Read API key from environment variable (server/routes/api.ts):**
+
+```typescript
+// Read from environment
+const myServiceApiKey = process.env.MY_SERVICE_API_KEY;
+
+// Include in start response
+app.get("/api/start", (req, res) => {
+  res.json({
+    // ... other config
+    myServiceApiKey,
+  });
+});
+```
+
+**2. Define in server types (server/types.ts):**
+
+```typescript
+export interface StartApiResponse {
+  // ... other fields
+  myServiceApiKey: string | undefined;
+}
+```
+
+**3. Pass to plugin View component (src/views/HomeView.vue):**
+
+```vue
+<component
+  :is="getToolPlugin(selectedResult.toolName!).viewComponent"
+  :selected-result="selectedResult"
+  :my-service-api-key="startResponse?.myServiceApiKey || null"
+/>
+```
+
+### Real Example: Google Maps API
+
+Here's how the Google Maps plugin integrates:
+
+**Plugin side (plugin.ts):**
+```typescript
+isEnabled: (startResponse) => !!startResponse?.googleMapKey,
+```
+
+**View component receives:**
+```vue
+<script setup>
+const props = defineProps<{
+  googleMapKey?: string | null;
+}>();
+</script>
+```
+
+**MulmoChat passes:**
+```vue
+<component :google-map-key="startResponse?.googleMapKey || null" />
+```
+
+### Summary
+
+| Location | Action |
+|----------|--------|
+| Plugin `plugin.ts` | Check `startResponse?.apiKey` in `isEnabled` |
+| Plugin `View.vue` | Add `apiKey` prop |
+| Host `server/routes/api.ts` | Read `process.env.API_KEY` |
+| Host `server/types.ts` | Add `apiKey` to `StartApiResponse` |
+| Host `HomeView.vue` | Pass `:api-key="startResponse?.apiKey"` |
 
 ---
 
