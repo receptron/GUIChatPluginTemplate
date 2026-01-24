@@ -790,6 +790,46 @@ messages.push({
 
 ---
 
+## Tailwind CSS Constraints
+
+**IMPORTANT**: Do NOT use Tailwind arbitrary values (JIT syntax) in plugin source code.
+
+Bad examples:
+```css
+bg-[#1a1a2e]  /* arbitrary color */
+w-[100px]     /* arbitrary width */
+min-h-[400px] /* arbitrary height */
+```
+
+Good examples:
+```css
+bg-slate-900  /* standard color */
+w-24          /* standard width */
+min-h-96      /* standard height */
+```
+
+**Reason**: Host applications (like MulmoChat) use `@source` directive to scan plugin dist files for Tailwind classes. Arbitrary values are not included in the host's CSS bundle.
+
+---
+
+## Updating Documentation
+
+**IMPORTANT**: When making spec changes or improvements to plugins through discussion with Claude:
+
+1. **Update this file (GUIChatPluginTemplate/CLAUDE.md)** if the change affects common plugin guidelines
+2. **Update the plugin's CLAUDE.md** with plugin-specific changes
+3. **Update related docs** in MulmoChat if needed:
+   - `docs/plugin-development-guide.md` (English)
+   - `docs/plugin-development-guide.ja.md` (Japanese)
+
+Each plugin repository should have its own CLAUDE.md that:
+- References this file for common guidelines
+- Contains plugin-specific information only
+
+This ensures future Claude sessions have accurate context.
+
+---
+
 ## Reference Documentation
 
 - [Getting Started](./docs/getting-started.md) - Beginner tutorial
