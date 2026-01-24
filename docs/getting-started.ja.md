@@ -988,6 +988,7 @@ ESLintがコードの問題点を指摘します。表示されたエラーや�
 1. **インタラクティブ性を追加**: `sendTextMessage`を使ってチャットにメッセージを送る
 2. **状態を追加**: `viewState`を使ってUI状態を永続化
 3. **スタイルを整える**: Tailwind CSSで美しいデザイン
+   > ⚠️ **重要**: `bg-[#1a1a2e]` のような arbitrary values は使用しないでください。MulmoChat は `@source` を使ってプラグインをスキャンするため、標準の Tailwind クラスのみサポートされます。
 4. **公開**: [npm公開ガイド](./npm-publishing-guide.md)に従う
 
 詳細は[高度な機能ガイド](./advanced-features.ja.md)を参照してください。
