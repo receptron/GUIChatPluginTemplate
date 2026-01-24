@@ -53,7 +53,7 @@ export function View({ selectedResult, sendTextMessage, onUpdateResult }: ViewPr
     if (isSelected) {
       return "border-blue-500 bg-blue-500/20";
     }
-    return "border-[#4b4b6b] hover:border-[#6b6b8b] hover:bg-[#6b6b8b]/20";
+    return "border-slate-600 hover:border-slate-500 hover:bg-slate-500/20";
   };
 
   const handleSubmit = () => {
@@ -79,11 +79,11 @@ export function View({ selectedResult, sendTextMessage, onUpdateResult }: ViewPr
   }
 
   return (
-    <div className="w-full min-h-[400px] overflow-y-auto p-8 bg-[#1a1a2e] rounded-lg">
+    <div className="w-full min-h-96 overflow-y-auto p-8 bg-slate-900 rounded-lg">
       <div className="max-w-3xl mx-auto">
         {/* Quiz Title */}
         {quizData.title && (
-          <h2 className="text-[#f0f0f0] text-3xl font-bold mb-8 text-center">
+          <h2 className="text-gray-100 text-3xl font-bold mb-8 text-center">
             {quizData.title}
           </h2>
         )}
@@ -93,7 +93,7 @@ export function View({ selectedResult, sendTextMessage, onUpdateResult }: ViewPr
           {quizData.questions.map((question, qIndex) => (
             <div
               key={qIndex}
-              className="bg-[#2d2d44] rounded-lg p-6 border-2 border-[#3d3d5c]"
+              className="bg-slate-800 rounded-lg p-6 border-2 border-slate-700"
             >
               {/* Question Text */}
               <div className="text-white text-lg font-semibold mb-4">
