@@ -8,6 +8,22 @@ GUIChatPluginTemplate is a template for creating GUI plugins for MulmoChat. It s
 
 **Current Sample**: Quiz plugin (displays multiple choice questions)
 
+## Philosophy
+
+This project is an implementation of **[gui-chat-protocol](https://github.com/receptron/gui-chat-protocol)**.
+
+gui-chat-protocol defines a standard interface for creating visual, interactive tool plugins that work with LLM chat applications. Key concepts:
+
+- **ToolDefinition**: JSON Schema format for LLM function calling
+- **ToolResult**: Standardized result format with `data`, `jsonData`, `instructions`, etc.
+- **ViewComponent / PreviewComponent**: UI components for displaying tool results
+- **Framework agnostic core**: Business logic separated from Vue/React UI
+
+MulmoChat and this plugin template are reference implementations of this protocol. By following gui-chat-protocol, plugins can be:
+- Reusable across different chat applications
+- Framework-flexible (Vue, React, or other frameworks)
+- Interoperable with any LLM that supports function calling
+
 ## Key Commands
 
 ```bash
