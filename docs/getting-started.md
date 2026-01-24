@@ -990,6 +990,7 @@ ESLint will point out code problems. Fix any errors or warnings shown.
 1. **Add Interactivity**: Use `sendTextMessage` to send messages back to chat
 2. **Add State**: Use `viewState` to persist UI state
 3. **Style It**: Use Tailwind CSS for beautiful designs
+   > ⚠️ **Important**: Do NOT use arbitrary values like `bg-[#1a1a2e]`. MulmoChat uses `@source` to scan plugins, which only supports standard Tailwind classes.
 4. **Publish**: Follow [npm Publishing Guide](./npm-publishing-guide.md)
 
 See [Advanced Features Guide](./advanced-features.md) for details on these topics.

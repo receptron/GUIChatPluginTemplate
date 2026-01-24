@@ -377,6 +377,20 @@ export default { plugin };
 
 ## Important Notes
 
+### ⚠️ No Tailwind Arbitrary Values
+
+Do NOT use Tailwind's arbitrary values (JIT syntax) in plugin code:
+
+```html
+<!-- ✅ Good: Standard Tailwind classes -->
+<div class="bg-slate-900 w-48 p-4">
+
+<!-- ❌ Bad: Arbitrary values - will NOT work in MulmoChat -->
+<div class="bg-[#1a1a2e] w-[137px] p-[10px]">
+```
+
+MulmoChat uses Tailwind's `@source` directive to scan plugin dist files. This only works with standard Tailwind classes. If you need custom values, define them in your plugin's `style.css` or use inline styles.
+
 ### ⚠️ View.vue Reactivity
 
 ```typescript
@@ -622,6 +636,20 @@ yarn dev
 ---
 
 ## 重要な注意点
+
+### ⚠️ Tailwind Arbitrary Values 禁止
+
+プラグインコードでは Tailwind の arbitrary values（JIT構文）を使用しないでください:
+
+```html
+<!-- ✅ 良い例: 標準 Tailwind クラス -->
+<div class="bg-slate-900 w-48 p-4">
+
+<!-- ❌ 悪い例: Arbitrary values - MulmoChat で動作しません -->
+<div class="bg-[#1a1a2e] w-[137px] p-[10px]">
+```
+
+MulmoChat は Tailwind の `@source` ディレクティブを使用してプラグインの dist ファイルをスキャンします。これは標準の Tailwind クラスのみをサポートします。カスタム値が必要な場合は、プラグインの `style.css` で定義するか、インラインスタイルを使用してください。
 
 ### ⚠️ View.vue のリアクティビティ
 
