@@ -54,6 +54,54 @@ yarn lint         # Lint check
 
 ---
 
+## Development Guidelines
+
+### Package Manager
+
+Use **yarn** instead of npm.
+
+- `yarn` for installing dependencies
+- `yarn add <package>` for adding packages
+- Do NOT use npm commands
+
+### Code Quality
+
+After making code changes, always run:
+
+1. `yarn lint` - Check for linting errors
+2. `yarn build` - Verify build succeeds
+
+### Project Setup
+
+- Node.js version: **24** or later
+- ESLint must use **flat config** (eslint.config.js), not legacy .eslintrc
+- Use **Tailwind CSS v4** (not v3) with `@tailwindcss/vite` plugin
+
+ESLint rules:
+- Indent: 2 spaces
+- Quotes: double (`"`)
+- Semicolons: required
+- Unused variables: prefix with `__` to ignore
+
+### Coding Style
+
+- Keep functions under 20 lines; split into smaller functions if needed
+- Prefer `const` over `let`; never use `var`
+- Prefer functional approaches (`forEach`, `map`, `filter`, `reduce`) over `for` loops
+- Prefer `async/await` over `.then()` chains
+- Use explicit type definitions; avoid `any`
+- No magic numbers; use named constants
+
+### Vue.js
+
+- Use Composition API (not Options API)
+- Always use relative paths for imports (not alias paths like `@/`)
+- Use `emit` instead of passing functions as props
+- Prefer `ref` over `reactive`
+- Never use `v-html` (security risk)
+
+---
+
 ## Plugin Creation Flow
 
 When a user requests "create a XX plugin", follow these steps.
@@ -887,6 +935,61 @@ After developing your plugin, you can add it to MulmoChat via GitHub (for testin
    ```
 
 For detailed instructions including npm publishing, see [npm Publishing Guide](./docs/npm-publishing-guide.md).
+
+---
+
+## npm Package Release
+
+When releasing a new version of a plugin to npm:
+
+**IMPORTANT**: Confirm with user before each step.
+
+### Steps
+
+1. **Sync with remote**:
+   ```bash
+   git pull origin main
+   ```
+
+2. **Bump version** in package.json (patch/minor/major)
+
+3. **Install and validate**:
+   ```bash
+   yarn install
+   yarn typecheck
+   yarn lint
+   yarn build
+   ```
+
+4. **Publish to npm**:
+   ```bash
+   npm publish --access public
+   ```
+
+5. **Commit changes** (add files individually, NOT `git add -A`):
+   ```bash
+   git add package.json yarn.lock
+   git commit -m "@package-name@version"
+   git push origin main
+   ```
+
+6. **Create git tag** (NO "v" prefix):
+   ```bash
+   git tag "1.0.0"
+   git push origin "1.0.0"
+   ```
+
+7. **Create GitHub release**:
+   ```bash
+   gh release create "1.0.0" --generate-notes --title "1.0.0"
+   ```
+
+### Important Rules
+
+- Tag format: `1.0.0` (NOT `v1.0.0`)
+- Commit message format: `@package-name@version` (e.g., `@gui-chat-plugin/quiz@0.1.1`)
+- Use `git pull origin main` for syncing (NEVER `git rebase`)
+- Add files individually (NEVER `git add -A` or `git add .`)
 
 ---
 
