@@ -4,9 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Overview
 
-GUIChatPluginTemplate is a template for creating GUI plugins for MulmoChat. It supports both Vue and React.
+GUIChatPluginTemplate is a **self-contained template** for creating GUI plugins for MulmoChat. It includes all documentation needed for plugin development - no need to reference MulmoChat docs.
 
 **Current Sample**: Quiz plugin (displays multiple choice questions)
+
+## Documentation
+
+All plugin development documentation is in the `docs/` directory:
+
+| Document | Description |
+|----------|-------------|
+| [Plugin Development Guide](./docs/plugin-development-guide.md) | Complete reference (architecture, types, patterns) |
+| [Getting Started](./docs/getting-started.md) | Beginner tutorial |
+| [Advanced Features](./docs/advanced-features.md) | sendTextMessage, viewState, Tailwind CSS |
+| [npm Publishing Guide](./docs/npm-publishing-guide.md) | Package publishing steps |
+
+**Key concepts covered in docs:**
+- **Key Innovation**: Dual-output architecture (GUI for users + JSON for AI)
+- **Plugin Configuration**: User-configurable settings with config components
+- **External API Keys**: Integration with host app API keys
+- **Advanced Patterns**: Games, file uploads, state persistence
 
 ## Philosophy
 
@@ -34,6 +51,54 @@ yarn build        # Build (outputs to dist/)
 yarn typecheck    # Type check
 yarn lint         # Lint check
 ```
+
+---
+
+## Development Guidelines
+
+### Package Manager
+
+Use **yarn** instead of npm.
+
+- `yarn` for installing dependencies
+- `yarn add <package>` for adding packages
+- Do NOT use npm commands
+
+### Code Quality
+
+After making code changes, always run:
+
+1. `yarn lint` - Check for linting errors
+2. `yarn build` - Verify build succeeds
+
+### Project Setup
+
+- Node.js version: **24** or later
+- ESLint must use **flat config** (eslint.config.js), not legacy .eslintrc
+- Use **Tailwind CSS v4** (not v3) with `@tailwindcss/vite` plugin
+
+ESLint rules:
+- Indent: 2 spaces
+- Quotes: double (`"`)
+- Semicolons: required
+- Unused variables: prefix with `__` to ignore
+
+### Coding Style
+
+- Keep functions under 20 lines; split into smaller functions if needed
+- Prefer `const` over `let`; never use `var`
+- Prefer functional approaches (`forEach`, `map`, `filter`, `reduce`) over `for` loops
+- Prefer `async/await` over `.then()` chains
+- Use explicit type definitions; avoid `any`
+- No magic numbers; use named constants
+
+### Vue.js
+
+- Use Composition API (not Options API)
+- Always use relative paths for imports (not alias paths like `@/`)
+- Use `emit` instead of passing functions as props
+- Prefer `ref` over `reactive`
+- Never use `v-html` (security risk)
 
 ---
 
@@ -830,8 +895,109 @@ This ensures future Claude sessions have accurate context.
 
 ---
 
+## Adding Plugin to MulmoChat
+
+After developing your plugin, you can add it to MulmoChat via GitHub (for testing) or npm (for production).
+
+### Quick Steps (GitHub Installation)
+
+1. **Build and commit dist**:
+   ```bash
+   yarn build
+   git add -f dist
+   git commit -m "build: add dist for GitHub installation"
+   git push origin main
+   ```
+
+2. **Add to MulmoChat's package.json**:
+   ```json
+   {
+     "dependencies": {
+       "@gui-chat-plugin/your-plugin": "github:your-username/GUIChatPluginYourName"
+     }
+   }
+   ```
+
+3. **Register plugin in MulmoChat** (`src/tools/index.ts`):
+   ```typescript
+   import YourPlugin from "@gui-chat-plugin/your-plugin/vue";
+
+   const pluginList = [
+     // ... existing plugins
+     YourPlugin,
+   ];
+   ```
+
+4. **CSS is automatic** - MulmoChat uses `@source` directive to include plugin styles:
+   ```css
+   /* src/index.css - already configured */
+   @source "../node_modules/@gui-chat-plugin/*/dist/vue.js";
+   ```
+
+For detailed instructions including npm publishing, see [npm Publishing Guide](./docs/npm-publishing-guide.md).
+
+---
+
+## npm Package Release
+
+When releasing a new version of a plugin to npm:
+
+**IMPORTANT**: Confirm with user before each step.
+
+### Steps
+
+1. **Sync with remote**:
+   ```bash
+   git pull origin main
+   ```
+
+2. **Bump version** in package.json (patch/minor/major)
+
+3. **Install and validate**:
+   ```bash
+   yarn install
+   yarn typecheck
+   yarn lint
+   yarn build
+   ```
+
+4. **Publish to npm**:
+   ```bash
+   npm publish --access public
+   ```
+
+5. **Commit changes** (add files individually, NOT `git add -A`):
+   ```bash
+   git add package.json yarn.lock
+   git commit -m "@package-name@version"
+   git push origin main
+   ```
+
+6. **Create git tag** (NO "v" prefix):
+   ```bash
+   git tag "1.0.0"
+   git push origin "1.0.0"
+   ```
+
+7. **Create GitHub release**:
+   ```bash
+   gh release create "1.0.0" --generate-notes --title "1.0.0"
+   ```
+
+### Important Rules
+
+- Tag format: `1.0.0` (NOT `v1.0.0`)
+- Commit message format: `@package-name@version` (e.g., `@gui-chat-plugin/quiz@0.1.1`)
+- Use `git pull origin main` for syncing (NEVER `git rebase`)
+- Add files individually (NEVER `git add -A` or `git add .`)
+
+---
+
 ## Reference Documentation
 
+See the `docs/` directory for detailed guides:
+
+- [Plugin Development Guide](./docs/plugin-development-guide.md) - Complete reference
 - [Getting Started](./docs/getting-started.md) - Beginner tutorial
 - [Advanced Features](./docs/advanced-features.md) - sendTextMessage, viewState, Tailwind CSS
 - [npm Publishing Guide](./docs/npm-publishing-guide.md) - Package publishing
