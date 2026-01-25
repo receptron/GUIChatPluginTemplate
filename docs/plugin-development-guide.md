@@ -4,15 +4,50 @@ Complete reference for developing GUIChat plugins. This guide covers all aspects
 
 ## Table of Contents
 
-1. [Architecture Overview](#architecture-overview)
-2. [Type System](#type-system)
-3. [Directory Structure](#directory-structure)
-4. [Core Implementation](#core-implementation)
-5. [UI Components](#ui-components)
-6. [Advanced Patterns](#advanced-patterns)
-7. [External API Key Integration](#external-api-key-integration)
-8. [Testing](#testing)
-9. [Checklist](#checklist)
+1. [Key Innovation](#key-innovation)
+2. [Architecture Overview](#architecture-overview)
+3. [Type System](#type-system)
+4. [Directory Structure](#directory-structure)
+5. [Core Implementation](#core-implementation)
+6. [UI Components](#ui-components)
+7. [Advanced Patterns](#advanced-patterns)
+8. [Plugin Configuration](#plugin-configuration)
+9. [External API Key Integration](#external-api-key-integration)
+10. [Testing](#testing)
+11. [Checklist](#checklist)
+
+---
+
+## Key Innovation
+
+**GUIChat extends OpenAI's function calling mechanism to enable direct GUI communication between plugins and users.**
+
+Traditional function calling systems follow this pattern:
+```
+User → AI → Function Call → Backend → JSON Response → AI → User
+```
+
+GUIChat's innovation adds a **visual layer** to this flow:
+```
+User → AI → Function Call → Plugin Execution → Rich GUI Result → User
+                    ↓
+                AI receives JSON summary for context
+```
+
+**What this means:**
+- **Dual Output:** Each plugin returns both machine-readable data (for the AI) and human-readable UI (for the user)
+- **Rich Interactions:** Users see images, maps, interactive games, videos—not just text
+- **Persistent Results:** Plugin outputs remain visible in the sidebar and can be re-selected
+- **Visual Context:** The AI knows what the user is seeing and can reference it naturally
+- **Bidirectional Communication:** Users can interact with plugin UIs while conversing with the AI
+
+**Example:** When the AI calls `generateImage("sunset over mountains")`:
+1. Plugin generates the image
+2. **User sees:** Full-resolution image rendered on canvas
+3. **AI receives:** `"Image generated successfully and displayed to user"`
+4. Conversation continues with both parties aware of the visual context
+
+This architecture transforms function calling from a backend integration pattern into a **multimodal user experience**.
 
 ---
 
@@ -577,6 +612,91 @@ export const pluginCore: ToolPluginCore = {
   ],
 };
 ```
+
+---
+
+## Plugin Configuration
+
+Add user-configurable settings to your plugin. This is useful when you want users to customize plugin behavior through a settings UI.
+
+> **Note:** Plugin configuration is a host app feature. The examples below show how MulmoChat implements this. Your host app may implement configuration differently.
+
+### Step 1: Create Config Component
+
+Create a Vue component for your configuration UI:
+
+```vue
+<template>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      Temperature Unit
+    </label>
+    <select
+      :value="value"
+      @change="$emit('update:value', ($event.target as HTMLSelectElement).value)"
+      class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="celsius">Celsius (°C)</option>
+      <option value="fahrenheit">Fahrenheit (°F)</option>
+    </select>
+    <p class="text-xs text-gray-500 mt-1">
+      Choose your preferred temperature unit.
+    </p>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineProps<{ value: "celsius" | "fahrenheit" }>();
+defineEmits<{ "update:value": [value: "celsius" | "fahrenheit"] }>();
+</script>
+```
+
+**Requirements:**
+- Props: `{ value: T }` - Current config value
+- Emits: `{ 'update:value': [newValue: T] }` - Value change events
+
+### Step 2: Add Config to Plugin
+
+```typescript
+import ConfigComponent from "./ConfigComponent.vue";
+
+export const plugin: ToolPlugin<MyData, MyJsonData, MyArgs> = {
+  // ... other properties
+  config: {
+    key: "myConfigKey",           // Storage key (unique per plugin)
+    defaultValue: "default",      // Default value
+    component: ConfigComponent,   // Vue component
+  },
+};
+```
+
+### Step 3: Use Config in Execute Function
+
+Access the configuration value through `context`:
+
+```typescript
+const execute = async (
+  context: ToolContext,
+  args: MyArgs,
+): Promise<ToolResult<MyData, MyJsonData>> => {
+  // Get user's configured value
+  const configValue = context.getPluginConfig?.("myConfigKey") || "default";
+
+  // Use configValue in your logic
+  const result = processWithConfig(args, configValue);
+
+  return {
+    toolName: TOOL_NAME,
+    message: "Success",
+    data: result,
+  };
+};
+```
+
+**How it works (in MulmoChat):**
+- Configs are automatically saved to `localStorage` under key `plugin_configs_v1`
+- The value is accessible via `context.getPluginConfig(key)`
+- The config UI is automatically rendered in the settings modal
 
 ---
 

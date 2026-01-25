@@ -4,9 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Overview
 
-GUIChatPluginTemplate is a template for creating GUI plugins for MulmoChat. It supports both Vue and React.
+GUIChatPluginTemplate is a **self-contained template** for creating GUI plugins for MulmoChat. It includes all documentation needed for plugin development - no need to reference MulmoChat docs.
 
 **Current Sample**: Quiz plugin (displays multiple choice questions)
+
+## Documentation
+
+All plugin development documentation is in the `docs/` directory:
+
+| Document | Description |
+|----------|-------------|
+| [Plugin Development Guide](./docs/plugin-development-guide.md) | Complete reference (architecture, types, patterns) |
+| [Getting Started](./docs/getting-started.md) | Beginner tutorial |
+| [Advanced Features](./docs/advanced-features.md) | sendTextMessage, viewState, Tailwind CSS |
+| [npm Publishing Guide](./docs/npm-publishing-guide.md) | Package publishing steps |
+
+**Key concepts covered in docs:**
+- **Key Innovation**: Dual-output architecture (GUI for users + JSON for AI)
+- **Plugin Configuration**: User-configurable settings with config components
+- **External API Keys**: Integration with host app API keys
+- **Advanced Patterns**: Games, file uploads, state persistence
 
 ## Philosophy
 
@@ -832,6 +849,9 @@ This ensures future Claude sessions have accurate context.
 
 ## Reference Documentation
 
+See the `docs/` directory for detailed guides:
+
+- [Plugin Development Guide](./docs/plugin-development-guide.md) - Complete reference
 - [Getting Started](./docs/getting-started.md) - Beginner tutorial
 - [Advanced Features](./docs/advanced-features.md) - sendTextMessage, viewState, Tailwind CSS
 - [npm Publishing Guide](./docs/npm-publishing-guide.md) - Package publishing
