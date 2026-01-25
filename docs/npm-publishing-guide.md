@@ -194,14 +194,15 @@ export const plugins = [
 ];
 ```
 
-### Import CSS
+### CSS (Automatic)
 
-Edit `src/main.ts`:
+MulmoChat's `src/index.css` uses `@source` to automatically include plugin styles:
 
-```typescript
-// Import plugin styles
-import "guichat-plugin-your-plugin-name/style.css";
+```css
+@source "../node_modules/@gui-chat-plugin/*/dist/vue.js";
 ```
+
+**No manual import needed** - plugin styles are automatically included.
 
 ### Verify Integration
 
@@ -244,13 +245,120 @@ Ensure `types` field in exports points to correct `.d.ts` files.
 ### CSS not loading
 
 Check:
-1. `style.css` is in `files` array
-2. Export path `./style.css` is correct
-3. Import path in MulmoChat is correct
+1. `style.css` is in `files` array in package.json
+2. Export path `./style.css` is correct in package.json exports
+3. MulmoChat's `src/index.css` has `@source` directive for your plugin path
+4. You are NOT using Tailwind arbitrary values (e.g., `bg-[#1a1a2e]`)
 
 ### Build files missing
 
 Run `npm run build` before publishing. Check `vite.config.ts` for correct output configuration.
+
+## GitHub Installation (Without npm Publish)
+
+If you want to test your plugin in MulmoChat before publishing to npm, you can install directly from GitHub.
+
+### Step 1: Build and Commit dist
+
+```bash
+# Build the plugin
+yarn build
+
+# Force add dist (normally gitignored)
+git add -f dist
+
+# Commit
+git commit -m "build: add dist for GitHub installation"
+
+# Push to GitHub
+git push origin main
+```
+
+### Step 2: Add to MulmoChat
+
+In MulmoChat's `package.json`, add your plugin using GitHub reference:
+
+```json
+{
+  "dependencies": {
+    "@gui-chat-plugin/your-plugin": "github:your-username/GUIChatPluginYourName"
+  }
+}
+```
+
+Then install:
+
+```bash
+yarn install
+```
+
+### Step 3: Configure MulmoChat
+
+You need to make changes in the MulmoChat repository:
+
+#### 3a. Register Plugin (src/tools/index.ts)
+
+```typescript
+// Add import at the top
+import YourPlugin from "@gui-chat-plugin/your-plugin/vue";
+
+// Add to pluginList array
+const pluginList = [
+  // ... existing plugins
+  YourPlugin,
+];
+```
+
+#### 3b. CSS (Automatic via @source)
+
+MulmoChat uses Tailwind's `@source` directive to automatically include plugin styles:
+
+```css
+/* src/index.css - already configured */
+@source "../node_modules/@gui-chat-plugin/*/dist/vue.js";
+```
+
+**No manual CSS import needed** - just make sure your plugin uses standard Tailwind classes (no arbitrary values like `bg-[#1a1a2e]`).
+
+#### 3c. (Optional) Pass API Keys to View Component
+
+If your plugin requires API keys, update `src/views/HomeView.vue`:
+
+```vue
+<component
+  :is="getToolPlugin(selectedResult.toolName!).viewComponent"
+  :selected-result="selectedResult"
+  :your-api-key="startResponse?.yourApiKey || null"
+/>
+```
+
+And add to `server/routes/api.ts`:
+
+```typescript
+const yourApiKey = process.env.YOUR_API_KEY;
+
+// In the start endpoint response
+res.json({
+  // ... other fields
+  yourApiKey,
+});
+```
+
+### Step 4: Test
+
+```bash
+yarn install
+yarn typecheck
+yarn dev
+```
+
+### Important Notes
+
+- **dist must be committed**: GitHub installation requires built files
+- **Update dist on changes**: Run `git add -f dist && git commit` after each build
+- **Switch to npm later**: Once stable, publish to npm and update package.json reference
+
+---
 
 ## Local Development with MulmoChat
 

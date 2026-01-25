@@ -847,6 +847,49 @@ This ensures future Claude sessions have accurate context.
 
 ---
 
+## Adding Plugin to MulmoChat
+
+After developing your plugin, you can add it to MulmoChat via GitHub (for testing) or npm (for production).
+
+### Quick Steps (GitHub Installation)
+
+1. **Build and commit dist**:
+   ```bash
+   yarn build
+   git add -f dist
+   git commit -m "build: add dist for GitHub installation"
+   git push origin main
+   ```
+
+2. **Add to MulmoChat's package.json**:
+   ```json
+   {
+     "dependencies": {
+       "@gui-chat-plugin/your-plugin": "github:your-username/GUIChatPluginYourName"
+     }
+   }
+   ```
+
+3. **Register plugin in MulmoChat** (`src/tools/index.ts`):
+   ```typescript
+   import YourPlugin from "@gui-chat-plugin/your-plugin/vue";
+
+   const pluginList = [
+     // ... existing plugins
+     YourPlugin,
+   ];
+   ```
+
+4. **CSS is automatic** - MulmoChat uses `@source` directive to include plugin styles:
+   ```css
+   /* src/index.css - already configured */
+   @source "../node_modules/@gui-chat-plugin/*/dist/vue.js";
+   ```
+
+For detailed instructions including npm publishing, see [npm Publishing Guide](./docs/npm-publishing-guide.md).
+
+---
+
 ## Reference Documentation
 
 See the `docs/` directory for detailed guides:
