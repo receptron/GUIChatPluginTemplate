@@ -1,3 +1,4 @@
+[![npm version](https://badge.fury.io/js/%40gui-chat-plugin%2Ftemplate.svg)](https://badge.fury.io/js/%40gui-chat-plugin%2Ftemplate)
 # GUIChat Plugin Template
 
 A plugin template for GUIChat/MulmoChat with **integrated chat demo environment**.
