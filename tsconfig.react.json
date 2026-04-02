@@ -18,8 +18,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "rootDir": "./src",
     "outDir": "./dist"
   },
-  "include": ["src/react/**/*.ts", "src/react/**/*.tsx", "src/core/**/*.ts"],
+  "include": ["src/env.d.ts", "src/react/**/*.ts", "src/react/**/*.tsx", "src/react/**/*.d.ts", "src/core/**/*.ts", "src/core/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
