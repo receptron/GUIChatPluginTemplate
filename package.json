@@ -1,6 +1,6 @@
 {
   "name": "@gui-chat-plugin/template",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "GUIChat Plugin Template with Chat Integration Demo",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -67,7 +67,7 @@
     "eslint": "^10.1.0",
     "eslint-plugin-vue": "^10.8.0",
     "globals": "^17.4.0",
-    "gui-chat-protocol": "^0.0.4",
+    "gui-chat-protocol": "^0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.2.2",
