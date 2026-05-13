@@ -1,5 +1,6 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# This workflow runs lint / typecheck / build / test across
+# Linux + Windows + macOS on Node 22.x and 24.x.
+# Reference: ../mulmoclaude/.github/workflows/pull_request.yaml
 
 name: Node.js CI
 
@@ -14,34 +15,56 @@ on:
 permissions:
   contents: read
 
-  
 jobs:
   lint_test:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [24.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [22.x, 24.x]
+        os: [ubuntu-latest, windows-2022, macos-latest]
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-    - run: yarn install
+        # setup-node's yarn cache is slow on Windows NTFS; cache
+        # node_modules directly below instead.
+        cache: ${{ runner.os == 'Windows' && '' || 'yarn' }}
+    - name: Disable Windows Defender realtime monitoring
+      if: runner.os == 'Windows'
+      run: Set-MpPreference -DisableRealtimeMonitoring $true
+      shell: powershell
+    - name: Cache node_modules (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: win-node-modules-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          win-node-modules-${{ matrix.node-version }}-
+    - run: yarn install --frozen-lockfile --network-timeout 120000
     - run: yarn run typecheck
     - run: yarn run lint
     - run: yarn run build
+    # Sanity-check `npm pack` only once (Linux + Node 24) to avoid
+    # 6-way artifact-name collisions; lint/build coverage is what
+    # the cross-OS matrix is actually for.
     - name: Update version with timestamp
+      if: matrix.os == 'ubuntu-latest' && matrix.node-version == '24.x'
+      shell: bash
       run: |
         TIMESTAMP=$(date +%Y%m%d%H%M%S)
         VERSION=$(node -p "require('./package.json').version")
         NEW_VERSION="${VERSION}-${TIMESTAMP}"
         npm version $NEW_VERSION --no-git-tag-version
-    - run: npm pack
+    - name: npm pack
+      if: matrix.os == 'ubuntu-latest' && matrix.node-version == '24.x'
+      run: npm pack
     - name: Upload artifact
+      if: matrix.os == 'ubuntu-latest' && matrix.node-version == '24.x'
       uses: actions/upload-artifact@v4
       with:
         name: npm-package
