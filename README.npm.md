@@ -91,3 +91,8 @@ Try these prompts to test the plugin:
 ## License
 
 MIT
+
+## Related
+
+- Protocol spec: [gui-chat-protocol](https://github.com/receptron/gui-chat-protocol)
+- Reference implementations using this protocol: [mulmoclaude](https://github.com/receptron/mulmoclaude) · [MulmoChat](https://github.com/receptron/MulmoChat)
