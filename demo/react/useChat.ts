@@ -136,11 +136,13 @@ export function useChat(options: UseChatOptions) {
 
         // Process tool calls if any
         while (message.tool_calls && message.tool_calls.length > 0) {
-          const toolCalls = message.tool_calls.map((tc) => ({
-            id: tc.id,
-            name: tc.function.name,
-            arguments: tc.function.arguments,
-          }));
+          const toolCalls = message.tool_calls
+            .filter((tc) => tc.type === "function")
+            .map((tc) => ({
+              id: tc.id,
+              name: tc.function.name,
+              arguments: tc.function.arguments,
+            }));
 
           currentMessages = [
             ...currentMessages,
