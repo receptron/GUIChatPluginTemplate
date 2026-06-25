@@ -88,6 +88,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "openai": "^6.45.0"
+    "openai": "^4.77.0"
   }
 }
