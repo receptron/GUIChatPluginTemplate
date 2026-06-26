@@ -25,7 +25,7 @@ jobs:
         node-version: [22.x, 24.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
       with:
@@ -39,7 +39,7 @@ jobs:
       shell: powershell
     - name: Cache node_modules (Windows)
       if: runner.os == 'Windows'
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: node_modules
         key: win-node-modules-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
