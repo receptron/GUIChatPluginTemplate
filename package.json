@@ -57,25 +57,25 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@tailwindcss/vite": "^4.3.2",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.64.0",
-    "@typescript-eslint/parser": "^8.64.0",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "@vitejs/plugin-react": "^6.0.4",
     "@vitejs/plugin-vue": "^6.0.8",
     "eslint": "^10.7.0",
-    "eslint-plugin-vue": "^10.9.2",
+    "eslint-plugin-vue": "^10.10.0",
     "globals": "^17.7.0",
     "gui-chat-protocol": "^1.1.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "tailwindcss": "^4.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
-    "vite": "^8.1.4",
-    "vue": "^3.5.39",
+    "vite": "^8.1.5",
+    "vue": "^3.5.40",
     "vue-eslint-parser": "^10.4.1",
-    "vue-tsc": "^3.3.7"
+    "vue-tsc": "^3.3.8"
   },
   "keywords": [
     "guichat",
@@ -88,6 +88,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "openai": "^6.47.0"
+    "openai": "^6.48.0"
   }
 }
