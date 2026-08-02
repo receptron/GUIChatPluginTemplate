@@ -901,13 +901,31 @@ After developing your plugin, you can add it to MulmoChat via GitHub (for testin
 
 ### Quick Steps (GitHub Installation)
 
-1. **Build and commit dist**:
-   ```bash
-   yarn build
-   git add -f dist
-   git commit -m "build: add dist for GitHub installation"
-   git push origin main
+1. **Let the install build it** — add a `prepare` script instead of committing `dist`:
+   ```json
+   {
+     "scripts": {
+       "prepare": "yarn build"
+     }
+   }
    ```
+   npm runs `prepare` when installing a git dependency, so `dist` is built from
+   source on the consumer's machine.
+
+   > **Do NOT `git add -f dist`.** `dist` is gitignored, so `git add -f` only
+   > tracks the files that exist at that moment. Once Vite code-splits, each new
+   > hashed chunk (`samples-<hash>.js`, `html2canvas-<hash>.js`, …) falls under
+   > the ignore rule and is never added — while the already-tracked entry files
+   > keep being updated to import them. The committed `dist` then points at files
+   > that are not in the repo:
+   >
+   > ```
+   > Error [ERR_MODULE_NOT_FOUND]: Cannot find module './dist/samples-Cx5kG2aH.js'
+   > ```
+   >
+   > This silently broke GitHub installs for MindMap / DrawingGame / AkinatorGame.
+   > Committing the chunks too does not fix it either: the hashes change on every
+   > build, so stale chunks pile up and the drift returns.
 
 2. **Add to MulmoChat's package.json**:
    ```json
