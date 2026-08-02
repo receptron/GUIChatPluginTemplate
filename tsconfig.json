@@ -18,6 +18,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
     "outDir": "./dist"
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "demo/**/*.ts", "demo/**/*.vue"],
