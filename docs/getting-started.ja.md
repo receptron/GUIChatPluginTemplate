@@ -531,7 +531,7 @@ execute(context: ToolContext, args: GreetingArgs): Promise<ToolResult>
 
 | 引数 | 説明 |
 |------|------|
-| `context` | 実行コンテキスト。`currentResult`（前回の結果）などを含む |
+| `context` | 実行コンテキスト。`currentResult`（前回の結果）、`app`（`generateImage` などホストの機能）、`userSpokeAt`、`conversationId`。詳しくは[プラグイン開発ガイド](./plugin-development-guide.md#toolcontext) |
 | `args` | LLMが渡した引数。definition.tsで定義したパラメータに基づく |
 
 ### ToolResultの構造（戻り値）

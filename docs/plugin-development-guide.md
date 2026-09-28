@@ -142,6 +142,7 @@ interface ToolResult<T, J> {
   instructionsRequired?: boolean; // Always send instructions
   updating?: boolean;           // Update existing result
   viewState?: Record<string, unknown>; // Persistent UI state
+  sequence?: SequenceStep | null; // 2.1: this result is a step of a sequence (see below)
 }
 ```
 
@@ -151,8 +152,43 @@ interface ToolResult<T, J> {
 interface ToolContext {
   currentResult?: ToolResult | null;  // Currently selected result
   app?: ToolContextApp;               // Host app features
+  userSpokeAt?: number;               // 2.1: when the user last spoke (Date.now() ms)
+  conversationId?: string;            // 2.2: which conversation the call belongs to
 }
 ```
+
+- **`app`** is an open record: a host adds the functions it has, and a plugin checks for one before
+  calling it. Two are shared conventions with fixed shapes (MulmoChat, MulmoGlass):
+  `generateImage(prompt)` and `editImages(prompt, imagePaths)` (a new picture from 1 to 8 saved
+  ones under `artifacts/images/`). Both return a `ToolResult` whose `data.imageData` is the
+  picture and `data.imagePath` where it was saved.
+- **`userSpokeAt`** is absent when the host doesn't know; a plugin then doesn't wait for the user.
+- **`conversationId`**: a plugin that keeps state in memory between calls keeps it per
+  `conversationId`, so conversations sharing one host (browser tabs on one server) don't mix.
+  Compare it, don't parse it. Absent means one conversation.
+
+### Sequences (steps shown one at a time)
+
+A tool that shows a sequence one step per call, such as slides or a story's panels, returns
+`sequence` on each result: where the sequence is and the call for the next step. A host that
+supports sequences asks the model once to go on when it ends a reply mid-sequence, which models
+do. Set `sequence: null` for a step that wasn't shown, and leave it out on results that aren't
+steps. A step that waits for the user sets `waitsForUser`, and the plugin holds a later step until
+`context.userSpokeAt` is after the waiting step appeared.
+
+```typescript
+return {
+  toolName: TOOL_NAME, data, message, instructions,
+  sequence: {
+    step: 2, total: 5, kind: "slideshow", label: "Slide 2 of 5",
+    onShown: "explain it", nextCall: "call presentSlide for slide 3 of 5",
+  },
+};
+```
+
+The full shapes, and the host side (`createSequenceKeeper`), are in the
+[API reference](https://github.com/receptron/gui-chat-protocol/blob/main/spec/API_REFERENCE.md). [`@gui-chat-plugin/sequence`](https://github.com/receptron/gui-chat-plugins/tree/main/packages/sequence) (presentSlide, defineStoryboard,
+presentPanel) is a working example.
 
 ---
 
