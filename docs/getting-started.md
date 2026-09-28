@@ -533,7 +533,7 @@ execute(context: ToolContext, args: GreetingArgs): Promise<ToolResult>
 
 | Argument | Description |
 |----------|-------------|
-| `context` | Execution context. Contains `currentResult` (previous result), etc. |
+| `context` | Execution context: `currentResult` (previous result), `app` (host features such as `generateImage`), `userSpokeAt` and `conversationId`. See the [plugin development guide](./plugin-development-guide.md#toolcontext) |
 | `args` | Arguments from LLM. Based on parameters defined in definition.ts |
 
 ### ToolResult Structure (Return Value)

@@ -192,6 +192,23 @@ interface ToolResult<T, J> {
 }
 ```
 
+### ToolContext
+
+The execute function receives a `ToolContext`:
+
+```typescript
+interface ToolContext {
+  currentResult?: ToolResult | null;  // Currently selected result
+  app?: ToolContextApp;               // Host app features
+  userSpokeAt?: number;               // 2.1: when the user last spoke (Date.now() ms)
+  conversationId?: string;            // 2.2: which conversation the call belongs to
+}
+```
+
+`app` holds the host's functions (check one exists before calling it; `generateImage` and
+`editImages` are shared conventions). A tool that shows steps one at a time returns `sequence` on
+its results. See the [API reference](https://github.com/receptron/gui-chat-protocol/blob/main/spec/API_REFERENCE.md).
+
 ### View Component Props
 
 ```typescript

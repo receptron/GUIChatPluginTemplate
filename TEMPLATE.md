@@ -426,6 +426,15 @@ rollupOptions: {
 }
 ```
 
+### ⚠️ Reach the Host Only Through `context`
+
+`execute()` may run in the browser or on the host's server, so it doesn't `fetch` host routes or
+touch `window`. Use what `ToolContext` carries: `currentResult`, `app` (check a function exists
+before calling it; `generateImage(prompt)` and `editImages(prompt, imagePaths)` are shared
+conventions), `userSpokeAt` (gui-chat-protocol 2.1) and `conversationId` (2.2: keep in-memory state
+per conversation). A tool that shows steps one at a time returns `sequence` on its results (2.1).
+See the [API reference](https://github.com/receptron/gui-chat-protocol/blob/main/spec/API_REFERENCE.md), and [`@gui-chat-plugin/sequence`](https://github.com/receptron/gui-chat-plugins/tree/main/packages/sequence) for an example.
+
 ### ⚠️ File Structure Verification
 
 Required for `yarn dev` to work:
@@ -685,6 +694,14 @@ rollupOptions: {
   external: ["vue"],
 }
 ```
+
+### ⚠️ ホストには `context` 経由でのみアクセス
+
+`execute()` はブラウザでもホストのサーバーでも動くことがあるので、ホストのルートを `fetch` したり
+`window` に触れたりしないでください。`ToolContext` にあるものを使います：`currentResult`、`app`（呼ぶ前に関数があるか確かめる。
+`generateImage(prompt)` と `editImages(prompt, imagePaths)` は共通の決まりごと）、`userSpokeAt`（gui-chat-protocol 2.1）、
+`conversationId`（2.2：メモリに持つ状態は会話ごとに持つ）。1 ステップずつ見せるツールは結果に `sequence` を返します（2.1）。
+[API リファレンス](https://github.com/receptron/gui-chat-protocol/blob/main/spec/API_REFERENCE.md)と、例として [`@gui-chat-plugin/sequence`](https://github.com/receptron/gui-chat-plugins/tree/main/packages/sequence) を参照してください。
 
 ---
 
