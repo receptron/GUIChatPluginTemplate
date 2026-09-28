@@ -172,8 +172,8 @@ interface ToolContext {
 A tool that shows a sequence one step per call, such as slides or a story's panels, returns
 `sequence` on each result: where the sequence is and the call for the next step. A host that
 supports sequences asks the model once to go on when it ends a reply mid-sequence, which models
-do. Set `sequence: null` for a step that wasn't shown, and leave it out on results that aren't
-steps. A step that waits for the user sets `waitsForUser`, and the plugin holds a later step until
+do, but not after a step that waits for the user (`waitsForUser`). Set `sequence: null` for a
+step that wasn't shown, and leave it out on results that aren't steps. A step that waits for the user sets `waitsForUser`, and the plugin holds a later step until
 `context.userSpokeAt` is after the waiting step appeared.
 
 ```typescript
