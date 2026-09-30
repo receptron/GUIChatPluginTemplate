@@ -133,7 +133,7 @@ yarn dev
 | `index.html` | Demo HTML entry |
 | `.gitignore` | Git ignore patterns |
 | `src/shims-vue.d.ts` | Vue type definitions |
-| `src/style.css` | Base styles |
+| `src/style.css` | Tailwind entry, shipped as `dist/style.css` into the host's page: no `body`/`html` styles |
 | `demo/main.ts` | Demo entry point |
 | `demo/App.vue` | Demo test UI (generic) |
 | `src/index.ts` | Plugin entry point |
@@ -614,7 +614,7 @@ yarn dev
 | `index.html` | デモHTMLエントリ |
 | `.gitignore` | Git除外パターン |
 | `src/shims-vue.d.ts` | Vue型定義 |
-| `src/style.css` | 基本スタイル |
+| `src/style.css` | Tailwind のエントリ。`dist/style.css` としてホストのページに読み込まれるので `body`/`html` にはスタイルを付けない |
 | `demo/main.ts` | デモエントリポイント |
 | `demo/App.vue` | デモ用テストUI（汎用） |
 | `src/index.ts` | プラグインエントリポイント |

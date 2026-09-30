@@ -30,6 +30,7 @@ src/
 2. **toolName property required** in ToolResult return
 3. **Types must be exported** from core/index.ts
 4. **style.css import** must be at top of vue/index.ts and react/index.ts
+5. **No `body`, `html` or `:root` styles in src/style.css**: it ships as `dist/style.css` into the host's page, so they restyle the whole host app (demo page styles go in `demo/`)
 
 ---
 

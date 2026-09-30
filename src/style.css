@@ -1,5 +1,5 @@
 @import "tailwindcss";
 
-body {
-  @apply m-0 p-5 font-sans bg-gray-100;
-}
+/* This file is the package's dist/style.css, which hosts import into their
+   own page: style only this plugin's components here, never body, html or
+   :root. The demo page's own look is in demo/vue/style.css. */
