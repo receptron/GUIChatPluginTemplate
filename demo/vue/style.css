@@ -1,0 +1,7 @@
+/* The Vue demo page only: not part of the package (src/style.css is). */
+body {
+  margin: 0;
+  padding: 1.25rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  background-color: #f3f4f6;
+}
