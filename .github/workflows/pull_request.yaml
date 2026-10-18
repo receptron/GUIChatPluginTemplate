@@ -1,5 +1,6 @@
 # This workflow runs lint / typecheck / build / test across
-# Linux + Windows + macOS on Node 24.x and 26.x (engines: node >=24).
+# Linux + Windows + macOS on Node 24.x and 26.x (engines: node >=22; CI runs 24+
+# because scoria, a devDependency, needs it).
 # Reference: ../mulmoclaude/.github/workflows/pull_request.yaml
 
 name: Node.js CI
