@@ -1,4 +1,5 @@
 [![npm version](https://badge.fury.io/js/%40gui-chat-plugin%2Ftemplate.svg)](https://badge.fury.io/js/%40gui-chat-plugin%2Ftemplate)
+[![scoria](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/receptron/GUIChatPluginTemplate/badges/scoria.json)](https://github.com/receptron/GUIChatPluginTemplate/actions/workflows/scoria.yml)
 # GUIChat Plugin Template
 
 A plugin template for GUIChat/MulmoChat with **integrated chat demo environment**.

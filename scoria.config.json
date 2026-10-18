@@ -1,0 +1,11 @@
+{
+  "profile": "library",
+  "stacks": [
+    "vue",
+    "react",
+    "ts"
+  ],
+  "mode": "report",
+  "targets": [],
+  "lang": "en"
+}

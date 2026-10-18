@@ -1,0 +1,22 @@
+name: scoria
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  # Measures with scoria, uploads the findings to code scanning and publishes the README badge.
+  # The project's code runs only in the workflow's read-only job; see the workflow for how the
+  # write permissions below are split between its upload and badge jobs.
+  scoria:
+    uses: isamu/lab/.github/workflows/scoria-measure.yml@776e7bf844fbf93545fec617d177e64e58a49a7b
+    permissions:
+      contents: write
+      security-events: write
+    with:
+      scoria: yarn run quality
