@@ -12,12 +12,7 @@ export const SAMPLES: ToolSample[] = [
       questions: [
         {
           question: "What does 'const' do in JavaScript?",
-          choices: [
-            "Declares a constant variable",
-            "Declares a mutable variable",
-            "Creates a function",
-            "Imports a module",
-          ],
+          choices: ["Declares a constant variable", "Declares a mutable variable", "Creates a function", "Imports a module"],
           correctAnswer: 0,
         },
         {

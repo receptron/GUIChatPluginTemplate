@@ -7,22 +7,10 @@ function App() {
   const currentPlugin = plugin as unknown as ToolPluginReact;
 
   // Chat hook
-  const {
-    messages,
-    setMessages,
-    isLoading,
-    error,
-    result,
-    setResult,
-    useMockMode,
-    hasApiKey,
-    sendMessage,
-    clearMessages,
-    toggleMockMode,
-    executePlugin,
-  } = useChat({
-    plugin: currentPlugin,
-  });
+  const { messages, setMessages, isLoading, error, result, setResult, useMockMode, hasApiKey, sendMessage, clearMessages, toggleMockMode, executePlugin } =
+    useChat({
+      plugin: currentPlugin,
+    });
 
   // Local state
   const [userInput, setUserInput] = useState("");
@@ -128,22 +116,13 @@ function App() {
                 />
                 <span className="text-sm text-gray-700">Mock Mode (no API key needed)</span>
               </label>
-              {hasApiKey && !useMockMode && (
-                <span className="text-xs text-green-600">API Key loaded from .env</span>
-              )}
+              {hasApiKey && !useMockMode && <span className="text-xs text-green-600">API Key loaded from .env</span>}
             </div>
-            <button
-              onClick={clearMessages}
-              className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-            >
+            <button onClick={clearMessages} className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
               Clear Chat
             </button>
           </div>
-          {!hasApiKey && !useMockMode && (
-            <p className="mt-2 text-xs text-amber-600">
-              No API key found. Create a .env file with VITE_OPENAI_API_KEY=your-key
-            </p>
-          )}
+          {!hasApiKey && !useMockMode && <p className="mt-2 text-xs text-amber-600">No API key found. Create a .env file with VITE_OPENAI_API_KEY=your-key</p>}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -151,9 +130,7 @@ function App() {
           <div className="bg-white rounded-lg shadow-md flex flex-col h-[600px]">
             <div className="p-3 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-700">Chat</h2>
-              <p className="text-xs text-gray-500">
-                {useMockMode ? "Mock mode - try 'quiz' or 'hello'" : "Real API mode"}
-              </p>
+              <p className="text-xs text-gray-500">{useMockMode ? "Mock mode - try 'quiz' or 'hello'" : "Real API mode"}</p>
             </div>
 
             {/* Messages */}
@@ -171,11 +148,7 @@ function App() {
                 >
                   <div className="text-xs text-gray-500 mb-1">{message.role}</div>
                   <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-                  {message.toolCalls && (
-                    <div className="mt-2 text-xs text-indigo-600">
-                      Tool call: {message.toolCalls.map((tc) => tc.name).join(", ")}
-                    </div>
-                  )}
+                  {message.toolCalls && <div className="mt-2 text-xs text-indigo-600">Tool call: {message.toolCalls.map((tc) => tc.name).join(", ")}</div>}
                 </div>
               ))}
 
@@ -185,9 +158,7 @@ function App() {
                 </div>
               )}
 
-              {error && (
-                <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm">{error}</div>
-              )}
+              {error && <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm">{error}</div>}
             </div>
 
             {/* Input */}
@@ -222,11 +193,7 @@ function App() {
                   <h2 className="text-lg font-semibold text-gray-700">View Component</h2>
                 </div>
                 <div className="p-4">
-                  <View
-                    selectedResult={result}
-                    sendTextMessage={handleSendTextMessage}
-                    onUpdateResult={handleUpdateResult}
-                  />
+                  <View selectedResult={result} sendTextMessage={handleSendTextMessage} onUpdateResult={handleUpdateResult} />
                 </div>
               </div>
             ) : (
@@ -276,9 +243,7 @@ function App() {
                 <span className="text-lg font-semibold text-gray-700">Result Data (Debug)</span>
               </summary>
               <div className="p-4">
-                <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-xs">
-                  {JSON.stringify(result, null, 2)}
-                </pre>
+                <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-xs">{JSON.stringify(result, null, 2)}</pre>
               </div>
             </details>
           </div>

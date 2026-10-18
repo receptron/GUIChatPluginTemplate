@@ -36,7 +36,7 @@ export function View({ selectedResult, sendTextMessage, onUpdateResult }: ViewPr
         });
       }
     },
-    [onUpdateResult]
+    [onUpdateResult],
   );
 
   const handleAnswerChange = (qIndex: number, cIndex: number) => {
@@ -82,19 +82,12 @@ export function View({ selectedResult, sendTextMessage, onUpdateResult }: ViewPr
     <div className="w-full min-h-96 overflow-y-auto p-8 bg-slate-900 rounded-lg">
       <div className="max-w-3xl mx-auto">
         {/* Quiz Title */}
-        {quizData.title && (
-          <h2 className="text-gray-100 text-3xl font-bold mb-8 text-center">
-            {quizData.title}
-          </h2>
-        )}
+        {quizData.title && <h2 className="text-gray-100 text-3xl font-bold mb-8 text-center">{quizData.title}</h2>}
 
         {/* Questions */}
         <div className="flex flex-col gap-6">
           {quizData.questions.map((question, qIndex) => (
-            <div
-              key={qIndex}
-              className="bg-slate-800 rounded-lg p-6 border-2 border-slate-700"
-            >
+            <div key={qIndex} className="bg-slate-800 rounded-lg p-6 border-2 border-slate-700">
               {/* Question Text */}
               <div className="text-white text-lg font-semibold mb-4">
                 <span className="text-blue-400 mr-2">{qIndex + 1}.</span>
@@ -117,9 +110,7 @@ export function View({ selectedResult, sendTextMessage, onUpdateResult }: ViewPr
                       className="mt-1 mr-3 size-4 shrink-0"
                     />
                     <span className="text-white flex-1">
-                      <span className="font-semibold mr-2">
-                        {String.fromCharCode(65 + cIndex)}.
-                      </span>
+                      <span className="font-semibold mr-2">{String.fromCharCode(65 + cIndex)}.</span>
                       {choice}
                     </span>
                   </label>
@@ -135,9 +126,7 @@ export function View({ selectedResult, sendTextMessage, onUpdateResult }: ViewPr
             onClick={handleSubmit}
             disabled={!allQuestionsAnswered}
             className={`py-3 px-8 rounded-lg text-white font-semibold text-lg transition-colors border-none cursor-pointer ${
-              allQuestionsAnswered
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-600 cursor-not-allowed opacity-50"
+              allQuestionsAnswered ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-600 cursor-not-allowed opacity-50"
             }`}
           >
             Submit Answers

@@ -49,7 +49,7 @@ export function useChat(options: UseChatOptions) {
       const execute = plugin.execute as (context: ToolContext, args: unknown) => Promise<ToolResult>;
       return await executePluginWithContext(execute, args, result);
     },
-    [plugin, result]
+    [plugin, result],
   );
 
   /**
@@ -100,7 +100,7 @@ export function useChat(options: UseChatOptions) {
 
       return newMessages;
     },
-    [executePlugin]
+    [executePlugin],
   );
 
   /**
@@ -180,9 +180,7 @@ export function useChat(options: UseChatOptions) {
 
           // Call API again to get LLM's response to tool results
           // Include instructions in the system prompt if available
-          const instructionPrompt = lastInstructions
-            ? `${systemPrompt}\n\n[Instructions for next response]: ${lastInstructions}`
-            : systemPrompt;
+          const instructionPrompt = lastInstructions ? `${systemPrompt}\n\n[Instructions for next response]: ${lastInstructions}` : systemPrompt;
 
           apiMessages = convertToApiMessages(currentMessages, instructionPrompt);
           response = await callOpenAI(client, model, apiMessages, tools);
@@ -208,7 +206,7 @@ export function useChat(options: UseChatOptions) {
         setIsLoading(false);
       }
     },
-    [messages, useMockMode, hasApiKey, handleMockResponse, apiKey, options.systemPrompt, plugin.systemPrompt, toolDefinition, model, executePlugin]
+    [messages, useMockMode, hasApiKey, handleMockResponse, apiKey, options.systemPrompt, plugin.systemPrompt, toolDefinition, model, executePlugin],
   );
 
   /**
