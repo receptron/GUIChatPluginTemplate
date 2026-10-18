@@ -19,4 +19,3 @@
 // Default export is core (framework-agnostic)
 export * from "./core/index";
 export { pluginCore as default } from "./core/index";
-

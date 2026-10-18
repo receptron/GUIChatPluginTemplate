@@ -14,10 +14,7 @@ import { SAMPLES } from "./samples";
 // Execute Function
 // ============================================================================
 
-export const executeQuiz = async (
-  _context: ToolContext,
-  args: QuizArgs,
-): Promise<ToolResult<never, QuizData>> => {
+export const executeQuiz = async (_context: ToolContext, args: QuizArgs): Promise<ToolResult<never, QuizData>> => {
   try {
     const { title, questions } = args;
 
@@ -48,16 +45,14 @@ export const executeQuiz = async (
       toolName: TOOL_DEFINITION.name,
       message: `Quiz presented with ${questions.length} question${questions.length > 1 ? "s" : ""}`,
       jsonData: quizData,
-      instructions:
-        "The quiz has been presented to the user. Wait for the user to submit their answers. They will tell you their answers in text format.",
+      instructions: "The quiz has been presented to the user. Wait for the user to submit their answers. They will tell you their answers in text format.",
     };
   } catch (error) {
     console.error("Quiz creation error", error);
     return {
       toolName: TOOL_DEFINITION.name,
       message: `Quiz error: ${error instanceof Error ? error.message : "Unknown error"}`,
-      instructions:
-        "Acknowledge that there was an error creating the quiz and suggest trying again.",
+      instructions: "Acknowledge that there was an error creating the quiz and suggest trying again.",
     };
   }
 };

@@ -21,17 +21,8 @@
 
       <!-- Choice indicators -->
       <div class="flex justify-center gap-1">
-        <div
-          v-for="(_, index) in Math.min(quizData.questions[0]?.choices.length || 0, 4)"
-          :key="index"
-          class="size-2 bg-gray-400 rounded-full"
-        ></div>
-        <div
-          v-if="(quizData.questions[0]?.choices.length || 0) > 4"
-          class="text-xs text-gray-500"
-        >
-          +{{ quizData.questions[0].choices.length - 4 }}
-        </div>
+        <div v-for="(_, index) in Math.min(quizData.questions[0]?.choices.length || 0, 4)" :key="index" class="size-2 bg-gray-400 rounded-full"></div>
+        <div v-if="(quizData.questions[0]?.choices.length || 0) > 4" class="text-xs text-gray-500">+{{ quizData.questions[0].choices.length - 4 }}</div>
       </div>
     </div>
   </div>

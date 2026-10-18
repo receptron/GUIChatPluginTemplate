@@ -51,6 +51,9 @@ jobs:
     - run: yarn install --frozen-lockfile --network-timeout 120000
     - run: yarn run typecheck
     - run: yarn run lint
+    # Windows checkouts get CRLF line endings, which prettier reports as unformatted.
+    - run: yarn run format:check
+      if: runner.os == 'Linux'
     - run: yarn run build
     # Sanity-check `npm pack` only once (Linux + Node 24) to avoid
     # 6-way artifact-name collisions; lint/build coverage is what

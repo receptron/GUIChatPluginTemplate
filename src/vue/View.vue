@@ -8,11 +8,7 @@
 
       <!-- Questions -->
       <div class="flex flex-col gap-6">
-        <div
-          v-for="(question, qIndex) in quizData.questions"
-          :key="qIndex"
-          class="bg-slate-800 rounded-lg p-6 border-2 border-slate-700"
-        >
+        <div v-for="(question, qIndex) in quizData.questions" :key="qIndex" class="bg-slate-800 rounded-lg p-6 border-2 border-slate-700">
           <!-- Question Text -->
           <div class="text-white text-lg font-semibold mb-4">
             <span class="text-blue-400 mr-2">{{ qIndex + 1 }}.</span>
@@ -27,13 +23,7 @@
               :class="getChoiceClass(qIndex, cIndex)"
               class="flex items-start p-4 rounded-lg cursor-pointer transition-all duration-200 border-2"
             >
-              <input
-                type="radio"
-                :name="`question-${qIndex}`"
-                :value="cIndex"
-                v-model="userAnswers[qIndex]"
-                class="mt-1 mr-3 size-4 shrink-0"
-              />
+              <input type="radio" :name="`question-${qIndex}`" :value="cIndex" v-model="userAnswers[qIndex]" class="mt-1 mr-3 size-4 shrink-0" />
               <span class="text-white flex-1">
                 <span class="font-semibold mr-2">{{ String.fromCharCode(65 + cIndex) }}.</span>
                 {{ choice }}
@@ -56,9 +46,7 @@
       </div>
 
       <!-- Progress Indicator -->
-      <div class="mt-4 text-center text-gray-400 text-sm">
-        {{ answeredCount }} / {{ quizData.questions.length }} questions answered
-      </div>
+      <div class="mt-4 text-center text-gray-400 text-sm">{{ answeredCount }} / {{ quizData.questions.length }} questions answered</div>
     </div>
   </div>
 </template>

@@ -38,7 +38,9 @@
     "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly && tsc -p tsconfig.react.json --emitDeclarationOnly",
     "typecheck": "vue-tsc --noEmit && tsc -p tsconfig.react.json --noEmit",
     "lint": "eslint src demo",
-    "quality": "scoria"
+    "quality": "scoria",
+    "format": "prettier --write \"{src,demo}/**/*.{ts,tsx,vue,json,css}\" \"*.{ts,js,json}\"",
+    "format:check": "prettier --check \"{src,demo}/**/*.{ts,tsx,vue,json,css}\" \"*.{ts,js,json}\""
   },
   "peerDependencies": {
     "gui-chat-protocol": "^2.1.0",
@@ -70,6 +72,7 @@
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.13.0",
     "gui-chat-protocol": "^2.3.0",
+    "prettier": "^3.9.10",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "scoria": "^0.4.1",
